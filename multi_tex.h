@@ -3,6 +3,7 @@
 
 #include "GLES2/gl2.h"
 #include "egl_utils.h"
+#include "fractal.h"
 
 #define NUM_TEXTURES 2
 
@@ -29,7 +30,7 @@ typedef struct
     int terminate;
 } STATE_T;
 
-void create_textures(STATE_T *state);
+void create_textures(STATE_T *state, FRAC_INFO *frac_info);
 void create_vertices();
 void create_shaders(STATE_T *state);
 void draw_textures(STATE_T *state);

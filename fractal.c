@@ -63,7 +63,7 @@ unsigned char MSetPixel(const FRAC_INFO *info, double cx, double cy)
         
     // Distance estimator coloring
     if(dist <= radius)
-        pixVal = 0.0;//pow(dist/radius, 1.0/3.0);
+        pixVal = pow(dist/radius, 1.0/3.0);
     // "Padding" between binary and distance
     else if(iter > 120)
         pixVal = 1.0;
@@ -107,7 +107,7 @@ void init_fractal(FRAC_INFO *info)
     const double yMax = yMin + 0.000060;
 
     //number of pixels in x and y
-    const int nx = 1400;
+    const int nx = 600;
     const int ny = ceil(nx*(yMax-yMin)/(xMax-xMin));
     const double spacing = (xMax-xMin)/(nx-1);
 

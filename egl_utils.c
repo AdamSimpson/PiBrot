@@ -149,8 +149,9 @@ int get_key_press(EGL_STATE_T *state)
     int key_code = -1;
 
     // Open file containing keyboard events
-    if (state->keyboard_fd < 0) 
-        state->keyboard_fd = open("/dev/input/event0",O_RDONLY|O_NONBLOCK);
+    // event0 or event1 depends on the USB PORT!!!!
+    if (state->keyboard_fd < 0)
+        state->keyboard_fd = open("/dev/input/event1",O_RDONLY|O_NONBLOCK);
     if (state->keyboard_fd >= 0) {
         struct input_event event;
         read(state->keyboard_fd, &event, sizeof(struct input_event));

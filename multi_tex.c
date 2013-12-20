@@ -8,16 +8,16 @@
 #include "EGL/egl.h"
 #include "EGL/eglext.h"
 
-#include "linux/input.h"
+#include "fractal.h"
 
 #include "bcm_host.h"
 
-void create_textures(STATE_T *state)
+void create_textures(STATE_T *state, FRAC_INFO *frac_info)
 {
     int i,j;
 
-    state->tex_width = 1400;
-    state->tex_height = 1401;
+    state->tex_width = frac_info->num_cols;
+    state->tex_height = frac_info->num_rows;
 
     // First image
     GLubyte *pixels = malloc(state->tex_width*state->tex_height*sizeof(GLubyte));
@@ -208,63 +208,3 @@ void draw_textures(STATE_T *state)
     glUniform1i(state->tex_location, 1);
     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_BYTE, 0);
 }
-/*
-int main(int argc, char *argv[])
-{
-    // Setup initial state
-    STATE_T state;
-    memset(&state, 0, sizeof(STATE_T));
-
-    bcm_host_init();
-      
-    // Start OGLES
-    init_ogl(&state.egl_state);
-
-    // Create and set textures
-    create_textures(&state);
-
-    // Create and set vertices
-    create_vertices();
-
-    // Create and set shaders
-    create_shaders(&state);
-
-    /////////////////////////////
-    // Testing only
-    /////////////////////////////
-    int i = 0;
-    GLubyte *row = malloc(state.tex_width*sizeof(GLubyte));
-    memset(row, 0, state.tex_width*sizeof(GLubyte));
-    GLubyte *row2 = malloc(10*state.tex_width*sizeof(GLubyte));
-    memset(row2, 255, 10*state.tex_width*sizeof(GLubyte)); 
-
-    // Event loop
-    while(!state.terminate)
-    {
-       ///////////////////////////
-       // Testing only
-       ///////////////////////////
-       if(i < state.tex_height) {
-        // Testing row update
-        update_texture_row(&state, state.textures[1], GL_TEXTURE1, i, row);
-        update_texture_rows(&state, state.textures[0], GL_TEXTURE0, i*10, row2);
-        i++;
-       }
-
-	// Draw textures
-	draw_textures(&state);
-
-        // Swap buffers
-        egl_swap(&state.egl_state);
-
-        // Check for keyboard input
-	int key_press = get_key_press(&state.egl_state);	
-	if(key_press == KEY_Q)
-	    state.terminate=1;
-    }
-
-    // Tidy up
-    exit_func(&state.egl_state);
-
-    return 0;
-}*/

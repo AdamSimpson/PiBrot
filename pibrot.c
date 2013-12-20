@@ -3,6 +3,7 @@
 #include "egl_utils.h"
 #include "multi_tex.h"
 #include "stdio.h"
+#include "linux/input.h"
 
 int main(int argc, char *argv[])
 {
@@ -26,7 +27,7 @@ int main(int argc, char *argv[])
         init_ogl(&state.egl_state);
 
         // Create and set textures
-        create_textures(&state);
+        create_textures(&state, &info);
 
         // Create and set vertices
         create_vertices();
@@ -36,6 +37,15 @@ int main(int argc, char *argv[])
 
         // Start master loop
         master(&info, &state);
+
+        // Wait for key press
+	while(!state.terminate) {
+            // Check for keyboard input
+            int key_press = get_key_press(&state.egl_state);        
+            if(key_press == KEY_Q)
+                state.terminate=1;
+        }
+        exit_func(&state.egl_state);	
     }
     else // Start slave loop
         slave(&info);
