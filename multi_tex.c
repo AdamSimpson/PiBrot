@@ -40,18 +40,17 @@ void create_textures(STATE_T *state, FRAC_INFO *frac_info)
     // Load texture
     glTexImage2D(GL_TEXTURE_2D, 0, GL_LUMINANCE, state->tex_width, state->tex_height, 0, GL_LUMINANCE, GL_UNSIGNED_BYTE, pixels);
 
-    // Free pixels
-    free(pixels);
-
     // Set filtering modes
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
+    // Generate mipmap
+    glGenerateMipmap(GL_TEXTURE_2D);
+
     // Second image
-    GLubyte *pixels2 = malloc(state->tex_width*state->tex_height*sizeof(GLubyte));
     for(i=0; i<state->tex_height; i++) {
         for(j=0; j<state->tex_width; j++) {
-            pixels2[i*state->tex_width + j] = 255;
+            pixels[i*state->tex_width + j] = 255;
         }
     }
  
@@ -60,13 +59,16 @@ void create_textures(STATE_T *state, FRAC_INFO *frac_info)
     glBindTexture(GL_TEXTURE_2D, state->textures[1]);
 
     // Load texture
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_LUMINANCE, state->tex_width, state->tex_height, 0, GL_LUMINANCE, GL_UNSIGNED_BYTE, pixels2);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_LUMINANCE, state->tex_width, state->tex_height, 0, GL_LUMINANCE, GL_UNSIGNED_BYTE, pixels);
+
+    // Generate mipmap
+    glGenerateMipmap(GL_TEXTURE_2D);
 
     // Free pixels
-    free(pixels2);
+    free(pixels);
 
     // Set filtering modes
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
 }
