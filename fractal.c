@@ -111,6 +111,7 @@ void init_fractal(FRAC_INFO *info)
     const int ny = ceil(nx*(yMax-yMin)/(xMax-xMin));
     const double spacing = (xMax-xMin)/(nx-1);
 
+    printf("nx: %d, ny: %d\n",nx,ny);
     const double threshold = 1.0;
 
     // Set frac info struct

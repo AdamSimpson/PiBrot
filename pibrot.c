@@ -6,16 +6,16 @@
 
 int main(int argc, char *argv[])
 {
-    // Initialize fractal
-    FRAC_INFO info;
-    init_fractal(&info);
-
     // Initialize MPI
     int myrank;
     MPI_Init(&argc, &argv);
     MPI_Comm_rank(MPI_COMM_WORLD, &myrank);
 
+    FRAC_INFO info;
+    init_fractal(&info);
+
     if (myrank == 0){
+
         // Setup initial OpenGL ES state
         STATE_T state;
         memset(&state, 0, sizeof(STATE_T));

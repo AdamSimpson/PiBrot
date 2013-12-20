@@ -16,8 +16,8 @@ void create_textures(STATE_T *state)
 {
     int i,j;
 
-    state->tex_width = 800;
-    state->tex_height = 1080;
+    state->tex_width = 1400;
+    state->tex_height = 1401;
 
     // First image
     GLubyte *pixels = malloc(state->tex_width*state->tex_height*sizeof(GLubyte));
