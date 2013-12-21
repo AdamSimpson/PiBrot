@@ -36,7 +36,8 @@ int main(int argc, char *argv[])
         create_shaders(&state);
 
         // Initial Draw before data arrives
-	
+        draw_textures(&state);
+        egl_swap(&state.egl_state);
 
         // Start master loop
         master(&info, &state);

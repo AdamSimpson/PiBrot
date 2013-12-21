@@ -3,6 +3,7 @@
 
 typedef struct
 {
+    int rank; // MPI rank
     int start_row;
     int num_rows;
     unsigned char *pixels;
