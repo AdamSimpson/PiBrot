@@ -13,7 +13,7 @@
 
 #include "bcm_host.h"
 
-void check()
+inline void check()
 {
     assert(glGetError() == 0);
 }

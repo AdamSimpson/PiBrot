@@ -107,7 +107,8 @@ void init_fractal(FRAC_INFO *info)
     const double yMax = yMin + 0.000060;
 
     //number of pixels in x and y
-    const int nx = 2000;
+    // MAX texture size is 2048 on the Pi version B
+    const int nx = 2047;
     const int ny = ceil(nx*(yMax-yMin)/(xMax-xMin));
     const double spacing = (xMax-xMin)/(nx-1);
 

@@ -15,7 +15,7 @@ void get_work(const FRAC_INFO  *info, int *rowsTaken, WORK_DATA *work)
         work->num_rows = 0;
         return;
     }
-    int rows = 16;
+    int rows = 8;
 
     work->start_row = *rowsTaken;
     int num_rows = (*rowsTaken)+rows<info->num_rows?rows:info->num_rows-(*rowsTaken);
@@ -26,7 +26,7 @@ void get_work(const FRAC_INFO  *info, int *rowsTaken, WORK_DATA *work)
 
 int get_max_work_size(const FRAC_INFO *info)
 {
-    return 16*info->num_cols;
+    return 8*info->num_cols;
 }
 
 void master(const FRAC_INFO *info, const STATE_T *ogl_state)
