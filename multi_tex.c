@@ -45,7 +45,7 @@ void create_textures(STATE_T *state, FRAC_INFO *frac_info)
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
     // Generate mipmap
-    glGenerateMipmap(GL_TEXTURE_2D);
+//    glGenerateMipmap(GL_TEXTURE_2D);
 
     // Second image
     for(i=0; i<state->tex_height; i++) {
@@ -62,27 +62,31 @@ void create_textures(STATE_T *state, FRAC_INFO *frac_info)
     glTexImage2D(GL_TEXTURE_2D, 0, GL_LUMINANCE, state->tex_width, state->tex_height, 0, GL_LUMINANCE, GL_UNSIGNED_BYTE, pixels);
 
     // Generate mipmap
-    glGenerateMipmap(GL_TEXTURE_2D);
-
-    // Free pixels
-    free(pixels);
+//    glGenerateMipmap(GL_TEXTURE_2D);
 
     // Set filtering modes
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
+    // Free pixels
+    free(pixels);
 
 }
 
 void update_texture_row(STATE_T *state, GLuint texture, GLenum tex_unit, GLsizei row, GLubyte *row_pixels)
 {
     glActiveTexture(tex_unit);
+    glBindTexture(GL_TEXTURE_2D, texture); // do you really need to bind?
     glTexSubImage2D(GL_TEXTURE_2D, 0, 0, row, state->tex_width, 1, GL_LUMINANCE, GL_UNSIGNED_BYTE, row_pixels);
+//    glGenerateMipmap(GL_TEXTURE_2D);
 }
 
 void update_texture_rows(STATE_T *state, GLuint texture, GLenum tex_unit, GLsizei start_row, GLuint num_rows, GLubyte *row_pixels)
 {
     glActiveTexture(tex_unit);
+    glBindTexture(GL_TEXTURE_2D, texture); // Do you really need to bind?
     glTexSubImage2D(GL_TEXTURE_2D, 0, 0, start_row, state->tex_width, num_rows, GL_LUMINANCE, GL_UNSIGNED_BYTE, row_pixels);
+//    glGenerateMipmap(GL_TEXTURE_2D);
 }
 
 // GLUE between outside world and textures - still requires state which I don't like

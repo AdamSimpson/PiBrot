@@ -35,6 +35,9 @@ int main(int argc, char *argv[])
         // Create and set shaders
         create_shaders(&state);
 
+        // Initial Draw before data arrives
+	
+
         // Start master loop
         master(&info, &state);
 
