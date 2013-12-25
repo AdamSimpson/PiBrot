@@ -98,22 +98,22 @@ void calcPixels(const FRAC_INFO *info, WORK_DATA *data)
     }
 }
 
-void init_fractal(FRAC_INFO *info)
+void init_fractal(FRAC_INFO *info, int pixel_width)
 {
     //Dimensions of grid
-    const double xMin = -.745429-0.000030;
-    const double xMax = xMin + 0.000060;
-    const double yMin = 0.113008-0.000030;
-    const double yMax = yMin + 0.000060;
+    double xMin = -.745429-0.000030;
+    double xMax = xMin + 0.000060;
+    double yMin = 0.113008-0.000030;
+    double yMax = yMin + 0.000060;
 
     //number of pixels in x and y
     // MAX texture size is 2048 on the Pi version B
-    const int nx = 2047;
-    const int ny = ceil(nx*(yMax-yMin)/(xMax-xMin));
-    const double spacing = (xMax-xMin)/(nx-1);
+    int nx = pixel_width;
+    int ny = ceil(nx*(yMax-yMin)/(xMax-xMin));
+    double spacing = (xMax-xMin)/(nx-1);
 
     printf("nx: %d, ny: %d\n",nx,ny);
-    const double threshold = 1.0;
+    double threshold = 1.0;
 
     // Set frac info struct
     info->num_cols = nx;

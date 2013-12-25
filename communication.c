@@ -103,7 +103,7 @@ int slave_recv_and_unpack(WORK_DATA *work, char *pack_buffer, int buffer_size)
 
 void master(FRAC_INFO *frac_left, FRAC_INFO *frac_right, const STATE_T *ogl_state)
 {
-    int ntasks, dest;
+    int ntasks, dest, side;
     WORK_DATA work_send;
     WORK_DATA work_recv;
 
@@ -161,12 +161,8 @@ void master(FRAC_INFO *frac_left, FRAC_INFO *frac_right, const STATE_T *ogl_stat
     }
 
     printf("sent initial work\n");
-    //Get next work item
-    get_work(frac_left, &work_send);
 
-    int side;
-
-    while(work_send.num_rows) {
+    while(1) {
 
 	// Receive work load and unpack
         master_recv_and_unpack(&work_recv, buffer, full_size);
@@ -183,35 +179,16 @@ void master(FRAC_INFO *frac_left, FRAC_INFO *frac_right, const STATE_T *ogl_stat
         // Update texture with recieved buffer
         update_fractal_rows(ogl_state, side, work_recv.start_row, work_recv.num_rows, work_recv.pixels);
 
-        // Send more work to the rank we just received from
+        // Get more work
         work_send.rank = work_recv.rank;
-
-        //pack and send work       
-        master_pack_and_send(&work_send, buffer, empty_size);        
-
-        //Get next work item
         get_work(frac, &work_send);
 
-    }
+        // Send more work or kill slaves
+        if(work_send.num_rows > 0)
+            master_pack_and_send(&work_send, buffer, empty_size);        
+ 	else
+            MPI_Send(0,0,MPI_INT,work_send.rank,DIETAG,MPI_COMM_WORLD);
 
-    // Recieve all remaining work
-    for (dest = 1; dest < ntasks; dest++) {
-
-	// Receive work load and unpack
-        master_recv_and_unpack(&work_recv, buffer, full_size);
-
-        if(work_recv.rank==1){
-	    side = LEFT;
-	}
-	else {
-	    side = RIGHT;
-	}
-
-        // Update texture with received buffer
-	update_fractal_rows(ogl_state, side, work_recv.start_row, work_recv.num_rows, work_recv.pixels);
-
-        // Kill slaves
-        MPI_Send(0,0,MPI_INT,dest,DIETAG,MPI_COMM_WORLD);
     }
 
     free(buffer);

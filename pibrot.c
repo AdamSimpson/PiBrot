@@ -13,8 +13,8 @@ int main(int argc, char *argv[])
     MPI_Comm_rank(MPI_COMM_WORLD, &myrank);
 
     FRAC_INFO frac_left, frac_right;
-    init_fractal(&frac_left);
-    init_fractal(&frac_right);
+    init_fractal(&frac_left, 300);
+    init_fractal(&frac_right, 1024);
 
     if (myrank == 0){
 
@@ -52,8 +52,11 @@ int main(int argc, char *argv[])
         }
         exit_func(&state.egl_state);	
     }
-    else // Start slave loop
-        slave(&frac_left);
+    else if(myrank == 1)
+	slave(&frac_left);
+    else{
+        slave(&frac_right);
+    }
 
     MPI_Finalize();
 
