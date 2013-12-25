@@ -13,6 +13,7 @@ typedef struct
 {
     int num_cols;
     int num_rows;
+    int rows_taken; // rows taken so far for computation
     double x_start;
     double y_start;
     double radius;

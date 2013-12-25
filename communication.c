@@ -9,24 +9,27 @@
 #define WORKTAG 1
 #define DIETAG 2
 
-void get_work(const FRAC_INFO  *info, int *rowsTaken, WORK_DATA *work)
+#define MAX_ROWS 1
+
+void get_work(FRAC_INFO  *info, WORK_DATA *work)
 {
-    if(*rowsTaken >= info->num_rows){
+    if(info->rows_taken >= info->num_rows){
         work->num_rows = 0;
         return;
     }
-    int rows = 8;
+    int rows = MAX_ROWS;
 
-    work->start_row = *rowsTaken;
-    int num_rows = (*rowsTaken)+rows<info->num_rows?rows:info->num_rows-(*rowsTaken);
+    work->start_row = info->rows_taken;
+    int num_rows = info->rows_taken+rows<info->num_rows?rows:info->num_rows-info->rows_taken;
     work->num_rows = num_rows;
 
-    *rowsTaken += num_rows;
+    info->rows_taken += num_rows;
+
 }
 
 int get_max_work_size(const FRAC_INFO *info)
 {
-    return 8*info->num_cols;
+    return MAX_ROWS*info->num_cols;
 }
 
 void master_pack_and_send(WORK_DATA *work, char *pack_buffer, int buffer_size)
@@ -104,7 +107,6 @@ void master(const FRAC_INFO *frac_info, const STATE_T *ogl_state)
     int ntasks, dest;
     WORK_DATA work_send;
     WORK_DATA work_recv;
-    int rowsTaken = 0;
 
     MPI_Comm_size(MPI_COMM_WORLD, &ntasks);    
 
@@ -136,7 +138,7 @@ void master(const FRAC_INFO *frac_info, const STATE_T *ogl_state)
     // Send initial data
     for (dest = 1; dest < ntasks; dest++) {
         //Get next work item
-        get_work(frac_info,&rowsTaken,&work_send);
+        get_work(frac_info, &work_send);
 
         // Set destination to send work to
         work_send.rank = dest;
@@ -147,7 +149,7 @@ void master(const FRAC_INFO *frac_info, const STATE_T *ogl_state)
 
     printf("sent initial work\n");
     //Get next work item
-    get_work(frac_info, &rowsTaken, &work_send);
+    get_work(frac_info, &work_send);
 
     while(work_send.num_rows) {
 
@@ -164,7 +166,7 @@ void master(const FRAC_INFO *frac_info, const STATE_T *ogl_state)
         master_pack_and_send(&work_send, buffer, empty_size);        
 
         //Get next work item
-        get_work(frac_info, &rowsTaken, &work_send);
+        get_work(frac_info, &work_send);
 
     }
 
