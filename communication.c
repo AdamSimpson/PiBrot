@@ -102,7 +102,7 @@ int slave_recv_and_unpack(WORK_DATA *work, char *pack_buffer, int buffer_size)
     return tag;
 }
 
-void master(const FRAC_INFO *frac_info, const STATE_T *ogl_state)
+void master(FRAC_INFO *frac_left, FRAC_INFO *frac_right, const STATE_T *ogl_state)
 {
     int ntasks, dest;
     WORK_DATA work_send;
@@ -110,8 +110,14 @@ void master(const FRAC_INFO *frac_info, const STATE_T *ogl_state)
 
     MPI_Comm_size(MPI_COMM_WORLD, &ntasks);    
 
+    // Maximum sizes
+    int left_size, right_size;
+    left_size = get_max_work_size(frac_left);
+    right_size = get_max_work_size(frac_right);
+    unsigned long max_work_size = left_size > right_size ? left_size : right_size;
+
     // Allocate buffer to hold received pixel data
-    size_t size = sizeof(unsigned char) * (unsigned long)frac_info->num_cols * (unsigned long)get_max_work_size(frac_info);
+    size_t size = sizeof(unsigned char) * max_work_size;
     work_recv.pixels = (unsigned char*)malloc(size);
     if(!work_recv.pixels) {
         printf("row pixel buffer allocation failed, %lu bytes\n", size);
@@ -126,7 +132,7 @@ void master(const FRAC_INFO *frac_info, const STATE_T *ogl_state)
     empty_size = member_size;
     MPI_Pack_size(1, MPI_INT, MPI_COMM_WORLD, &member_size);
     empty_size += member_size;
-    MPI_Pack_size(get_max_work_size(frac_info), MPI_UNSIGNED_CHAR, MPI_COMM_WORLD, &member_size);
+    MPI_Pack_size(max_work_size, MPI_UNSIGNED_CHAR, MPI_COMM_WORLD, &member_size);
     full_size = empty_size + member_size;
 
     buffer = malloc(full_size);    
@@ -138,7 +144,7 @@ void master(const FRAC_INFO *frac_info, const STATE_T *ogl_state)
     // Send initial data
     for (dest = 1; dest < ntasks; dest++) {
         //Get next work item
-        get_work(frac_info, &work_send);
+        get_work(frac_left, &work_send);
 
         // Set destination to send work to
         work_send.rank = dest;
@@ -149,15 +155,15 @@ void master(const FRAC_INFO *frac_info, const STATE_T *ogl_state)
 
     printf("sent initial work\n");
     //Get next work item
-    get_work(frac_info, &work_send);
+    get_work(frac_left, &work_send);
 
     while(work_send.num_rows) {
 
 	// Receive work load and unpack
-        master_recv_and_unpack(&work_recv, frac_info, buffer, full_size);
+        master_recv_and_unpack(&work_recv, frac_left, buffer, full_size);
 
         // Update texture with recieved buffer
-        update_fractal_rows(ogl_state, 0, work_recv.start_row, work_recv.num_rows, work_recv.pixels);
+        update_fractal_rows(ogl_state, RIGHT, work_recv.start_row, work_recv.num_rows, work_recv.pixels);
 
         // Send more work to the rank we just received from
         work_send.rank = work_recv.rank;
@@ -166,7 +172,7 @@ void master(const FRAC_INFO *frac_info, const STATE_T *ogl_state)
         master_pack_and_send(&work_send, buffer, empty_size);        
 
         //Get next work item
-        get_work(frac_info, &work_send);
+        get_work(frac_left, &work_send);
 
     }
 
@@ -174,10 +180,10 @@ void master(const FRAC_INFO *frac_info, const STATE_T *ogl_state)
     for (dest = 1; dest < ntasks; dest++) {
 
 	// Receive work load and unpack
-        master_recv_and_unpack(&work_recv, frac_info, buffer, full_size);
+        master_recv_and_unpack(&work_recv, frac_left, buffer, full_size);
 
         // Update texture with received buffer
-	update_fractal_rows(ogl_state, 0,  work_recv.start_row, work_recv.num_rows, work_recv.pixels);
+	update_fractal_rows(ogl_state, RIGHT,  work_recv.start_row, work_recv.num_rows, work_recv.pixels);
 
         // Kill slaves
         MPI_Send(0,0,MPI_INT,dest,DIETAG,MPI_COMM_WORLD);
@@ -187,7 +193,7 @@ void master(const FRAC_INFO *frac_info, const STATE_T *ogl_state)
     free(work_recv.pixels);
 }
 
-void slave(const FRAC_INFO *frac_info)
+void slave(FRAC_INFO *frac_info)
 {
     MPI_Status status;
     int tag, rank;

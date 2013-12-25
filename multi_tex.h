@@ -6,6 +6,8 @@
 #include "fractal.h"
 
 #define NUM_TEXTURES 2
+#define LEFT 0
+#define RIGHT 1
 
 typedef struct
 {
@@ -24,18 +26,17 @@ typedef struct
     GLuint textures[NUM_TEXTURES];
 
     // Texture attributes
-    GLsizei tex_width;
-    GLsizei tex_height;
+    GLsizei tex_width[NUM_TEXTURES];
+    GLsizei tex_height[NUM_TEXTURES];
 
     int terminate;
 } STATE_T;
 
-void create_textures(STATE_T *state, FRAC_INFO *frac_info);
+void update_texture_rows(STATE_T *state, int fractal, GLsizei start_row, GLuint num_rows, GLubyte *row_pixels);
+void update_fractal_rows(const STATE_T *state, int fractal, unsigned int start_row, unsigned int num_rows, unsigned char *row_pixels);
+void create_textures(STATE_T *state, FRAC_INFO *frac_left, FRAC_INFO *frac_right);
 void create_vertices();
 void create_shaders(STATE_T *state);
 void draw_textures(STATE_T *state);
-void update_texture_row(STATE_T *state, GLuint texture, GLenum tex_unit, GLsizei row, GLubyte *row_pixels);
-void update_texture_rows(STATE_T *state, GLuint texture, GLenum tex_unit, GLsizei start_row, GLuint num_rows, GLubyte *row_pixels);
-void update_fractal_rows(const STATE_T *state, int fractal, unsigned int start_row, unsigned int num_rows, unsigned char *row_pixels);
 
 #endif

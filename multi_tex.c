@@ -12,18 +12,22 @@
 
 #include "bcm_host.h"
 
-void create_textures(STATE_T *state, FRAC_INFO *frac_info)
+void create_textures(STATE_T *state, FRAC_INFO *frac_left, FRAC_INFO *frac_right)
 {
     int i,j;
+    GLubyte *pixels;
 
-    state->tex_width = frac_info->num_cols;
-    state->tex_height = frac_info->num_rows;
+    state->tex_width[LEFT] = frac_left->num_cols;
+    state->tex_height[LEFT] = frac_left->num_rows;
 
-    // First image
-    GLubyte *pixels = malloc(state->tex_width*state->tex_height*sizeof(GLubyte));
-    for(i=0; i<state->tex_height; i++) {
-        for(j=0; j<state->tex_width; j++) {
-            pixels[i*state->tex_width + j] = 0;
+    state->tex_width[RIGHT] = frac_right->num_cols;
+    state->tex_height[RIGHT] = frac_right->num_rows;
+
+    // Left fractal
+    pixels = malloc(state->tex_width[LEFT]*state->tex_height[LEFT]*sizeof(GLubyte));
+    for(i=0; i<state->tex_height[LEFT]; i++) {
+        for(j=0; j<state->tex_width[LEFT]; j++) {
+            pixels[i*state->tex_width[LEFT] + j] = 0;
         }
     }
       
@@ -35,31 +39,34 @@ void create_textures(STATE_T *state, FRAC_INFO *frac_info)
 
     // Set texture unit 0 and bind texture
     glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, state->textures[0]);
+    glBindTexture(GL_TEXTURE_2D, state->textures[LEFT]);
 
     // Load texture
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_LUMINANCE, state->tex_width, state->tex_height, 0, GL_LUMINANCE, GL_UNSIGNED_BYTE, pixels);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_LUMINANCE, state->tex_width[LEFT], state->tex_height[LEFT], 0, GL_LUMINANCE, GL_UNSIGNED_BYTE, pixels);
 
     // Set filtering modes
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
+    free(pixels);
+
     // Generate mipmap
 //    glGenerateMipmap(GL_TEXTURE_2D);
 
-    // Second image
-    for(i=0; i<state->tex_height; i++) {
-        for(j=0; j<state->tex_width; j++) {
-            pixels[i*state->tex_width + j] = 255;
+    // Right image
+    pixels = malloc(state->tex_width[RIGHT]*state->tex_height[RIGHT]*sizeof(GLubyte));
+    for(i=0; i<state->tex_height[RIGHT]; i++) {
+        for(j=0; j<state->tex_width[RIGHT]; j++) {
+            pixels[i*state->tex_width[RIGHT] + j] = 255;
         }
     }
  
     // Set texture unit 1 and bind texture
-    glActiveTexture(GL_TEXTURE1);
+//    glActiveTexture(GL_TEXTURE1);
     glBindTexture(GL_TEXTURE_2D, state->textures[1]);
 
     // Load texture
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_LUMINANCE, state->tex_width, state->tex_height, 0, GL_LUMINANCE, GL_UNSIGNED_BYTE, pixels);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_LUMINANCE, state->tex_width[RIGHT], state->tex_height[RIGHT], 0, GL_LUMINANCE, GL_UNSIGNED_BYTE, pixels);
 
     // Generate mipmap
 //    glGenerateMipmap(GL_TEXTURE_2D);
@@ -72,27 +79,27 @@ void create_textures(STATE_T *state, FRAC_INFO *frac_info)
     free(pixels);
 
 }
-
+/*
 void update_texture_row(STATE_T *state, GLuint texture, GLenum tex_unit, GLsizei row, GLubyte *row_pixels)
 {
-    glActiveTexture(tex_unit);
-    glBindTexture(GL_TEXTURE_2D, texture); // do you really need to bind?
+//    glActiveTexture(tex_unit);
+    glBindTexture(GL_TEXTURE_2D, texture);
     glTexSubImage2D(GL_TEXTURE_2D, 0, 0, row, state->tex_width, 1, GL_LUMINANCE, GL_UNSIGNED_BYTE, row_pixels);
 //    glGenerateMipmap(GL_TEXTURE_2D);
 }
-
-void update_texture_rows(STATE_T *state, GLuint texture, GLenum tex_unit, GLsizei start_row, GLuint num_rows, GLubyte *row_pixels)
+*/
+void update_texture_rows(STATE_T *state, int fractal, GLsizei start_row, GLuint num_rows, GLubyte *row_pixels)
 {
-    glActiveTexture(tex_unit);
-    glBindTexture(GL_TEXTURE_2D, texture); // Do you really need to bind?
-    glTexSubImage2D(GL_TEXTURE_2D, 0, 0, start_row, state->tex_width, num_rows, GL_LUMINANCE, GL_UNSIGNED_BYTE, row_pixels);
+//    glActiveTexture(tex_unit);
+    glBindTexture(GL_TEXTURE_2D, state->textures[fractal]);
+    glTexSubImage2D(GL_TEXTURE_2D, 0, 0, start_row, state->tex_width[fractal], num_rows, GL_LUMINANCE, GL_UNSIGNED_BYTE, row_pixels);
 //    glGenerateMipmap(GL_TEXTURE_2D);
 }
 
 // GLUE between outside world and textures - still requires state which I don't like
 void update_fractal_rows(const STATE_T *state, int fractal, unsigned int start_row, unsigned int num_rows, unsigned char *row_pixels)
 {
-   update_texture_rows(state, state->textures[0], GL_TEXTURE0, (GLsizei)start_row, (GLsizei)num_rows, (GLubyte*)row_pixels);
+   update_texture_rows(state, fractal, (GLsizei)start_row, (GLsizei)num_rows, (GLubyte*)row_pixels);
    // Draw textures
    draw_textures(state);
    // Swap buffers
@@ -198,19 +205,21 @@ void draw_textures(STATE_T *state)
     // Size of each vertex in bytes
     size_t vert_size = 4*sizeof(GL_FLOAT);
 
-    // Draw image 0
+    // Draw left fractal
     glVertexAttribPointer(state->position_location, 2, GL_FLOAT, GL_FALSE, vert_size, 0);
     glEnableVertexAttribArray(state->position_location);
     glVertexAttribPointer(state->tex_coord_location, 2, GL_FLOAT, GL_FALSE, vert_size,(void*)(2*sizeof(GL_FLOAT)));
     glEnableVertexAttribArray(state->tex_coord_location);
+    glBindTexture(GL_TEXTURE_2D, state->textures[LEFT]);
     glUniform1i(state->tex_location, 0);
     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_BYTE, 0);
 
-    // Draw image 1
+    // Draw right fractal
     glVertexAttribPointer(state->position_location, 2, GL_FLOAT, GL_FALSE, vert_size, (void*)(4*vert_size));
     glEnableVertexAttribArray(state->position_location);
     glVertexAttribPointer(state->tex_coord_location, 2, GL_FLOAT, GL_FALSE, vert_size,(void*)(4*vert_size+2*sizeof(GL_FLOAT)));
     glEnableVertexAttribArray(state->tex_coord_location);
-    glUniform1i(state->tex_location, 1);
+    glBindTexture(GL_TEXTURE_2D, state->textures[RIGHT]);
+    glUniform1i(state->tex_location, 0);
     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_BYTE, 0);
 }

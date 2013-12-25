@@ -12,8 +12,9 @@ int main(int argc, char *argv[])
     MPI_Init(&argc, &argv);
     MPI_Comm_rank(MPI_COMM_WORLD, &myrank);
 
-    FRAC_INFO info;
-    init_fractal(&info);
+    FRAC_INFO frac_left, frac_right;
+    init_fractal(&frac_left);
+    init_fractal(&frac_right);
 
     if (myrank == 0){
 
@@ -27,7 +28,7 @@ int main(int argc, char *argv[])
         init_ogl(&state.egl_state);
 
         // Create and set textures
-        create_textures(&state, &info);
+        create_textures(&state, &frac_left, &frac_right);
 
         // Create and set vertices
         create_vertices();
@@ -40,7 +41,7 @@ int main(int argc, char *argv[])
         egl_swap(&state.egl_state);
 
         // Start master loop
-        master(&info, &state);
+        master(&frac_left, &frac_right, &state);
 
         // Wait for key press
 	while(!state.terminate) {
@@ -52,7 +53,7 @@ int main(int argc, char *argv[])
         exit_func(&state.egl_state);	
     }
     else // Start slave loop
-        slave(&info);
+        slave(&frac_left);
 
     MPI_Finalize();
 
