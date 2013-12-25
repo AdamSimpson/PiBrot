@@ -10,7 +10,7 @@ int  get_max_work_size(const FRAC_INFO *info);
 void master(FRAC_INFO *frac_left, FRAC_INFO *frac_right, const STATE_T *ogl_state);
 void slave(FRAC_INFO *info);
 void master_pack_and_send(WORK_DATA *work, char *pack_buffer, int buffer_size);
-int  master_recv_and_unpack(WORK_DATA *work, FRAC_INFO *frac_info, char *pack_buffer, int buffer_size);
+int  master_recv_and_unpack(WORK_DATA *work, char *pack_buffer, int buffer_size);
 void slave_pack_and_send(WORK_DATA *work, FRAC_INFO *frac_info, char *pack_buffer, int buffer_size);
 int  slave_recv_and_unpack(WORK_DATA *work, char *pack_buffer, int buffer_size);
 

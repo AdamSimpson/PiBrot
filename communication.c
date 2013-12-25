@@ -43,27 +43,26 @@ void master_pack_and_send(WORK_DATA *work, char *pack_buffer, int buffer_size)
     MPI_Send(pack_buffer, position, MPI_PACKED, work->rank, WORKTAG, MPI_COMM_WORLD);
 }
 
-int master_recv_and_unpack(WORK_DATA *work, FRAC_INFO *frac_info, char *pack_buffer, int buffer_size)
+int master_recv_and_unpack(WORK_DATA *work, char *pack_buffer, int buffer_size)
 {
-    int tag, position, msg_size;
+    int tag, source_rank, position, msg_size, num_pixels;
+    FRAC_INFO *frac;
     MPI_Status status;
 
     // Recieve and unpack work
     MPI_Recv(pack_buffer, buffer_size, MPI_PACKED, MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
-   
-    // Check tag for work/die
-    tag = status.MPI_TAG;
-    if(tag == DIETAG) {
-        return tag;
-    }
 
     position = 0;
     work->rank = status.MPI_SOURCE;
-
+ 
+    // Count of MPI_PACKED type returns bytes
     MPI_Get_count(&status, MPI_PACKED, &msg_size);
+    source_rank = status.MPI_SOURCE;
+
     MPI_Unpack(pack_buffer, msg_size, &position, &work->start_row,1,MPI_INT, MPI_COMM_WORLD);
     MPI_Unpack(pack_buffer, msg_size, &position, &work->num_rows,1,MPI_INT, MPI_COMM_WORLD);
-    MPI_Unpack(pack_buffer, msg_size, &position, work->pixels, work->num_rows*frac_info->num_cols, MPI_UNSIGNED_CHAR, MPI_COMM_WORLD);
+    num_pixels = msg_size - position;
+    MPI_Unpack(pack_buffer, msg_size, &position, work->pixels, num_pixels, MPI_UNSIGNED_CHAR, MPI_COMM_WORLD);
 
     return tag;
 }
@@ -141,10 +140,18 @@ void master(FRAC_INFO *frac_left, FRAC_INFO *frac_right, const STATE_T *ogl_stat
         exit(1);
     }
 
+    FRAC_INFO *frac;
+
     // Send initial data
     for (dest = 1; dest < ntasks; dest++) {
+       // Rank 1 handles the left fractal
+        if(dest==1)
+	    frac = frac_left;
+	else
+	    frac = frac_right;
+
         //Get next work item
-        get_work(frac_left, &work_send);
+        get_work(frac, &work_send);
 
         // Set destination to send work to
         work_send.rank = dest;
@@ -157,13 +164,24 @@ void master(FRAC_INFO *frac_left, FRAC_INFO *frac_right, const STATE_T *ogl_stat
     //Get next work item
     get_work(frac_left, &work_send);
 
+    int side;
+
     while(work_send.num_rows) {
 
 	// Receive work load and unpack
-        master_recv_and_unpack(&work_recv, frac_left, buffer, full_size);
+        master_recv_and_unpack(&work_recv, buffer, full_size);
+
+        if(work_recv.rank==1){
+	    frac = frac_left;
+	    side = LEFT;
+	}
+	else {
+	    frac = frac_right;
+	    side = RIGHT;
+	}
 
         // Update texture with recieved buffer
-        update_fractal_rows(ogl_state, RIGHT, work_recv.start_row, work_recv.num_rows, work_recv.pixels);
+        update_fractal_rows(ogl_state, side, work_recv.start_row, work_recv.num_rows, work_recv.pixels);
 
         // Send more work to the rank we just received from
         work_send.rank = work_recv.rank;
@@ -172,7 +190,7 @@ void master(FRAC_INFO *frac_left, FRAC_INFO *frac_right, const STATE_T *ogl_stat
         master_pack_and_send(&work_send, buffer, empty_size);        
 
         //Get next work item
-        get_work(frac_left, &work_send);
+        get_work(frac, &work_send);
 
     }
 
@@ -180,10 +198,17 @@ void master(FRAC_INFO *frac_left, FRAC_INFO *frac_right, const STATE_T *ogl_stat
     for (dest = 1; dest < ntasks; dest++) {
 
 	// Receive work load and unpack
-        master_recv_and_unpack(&work_recv, frac_left, buffer, full_size);
+        master_recv_and_unpack(&work_recv, buffer, full_size);
+
+        if(work_recv.rank==1){
+	    side = LEFT;
+	}
+	else {
+	    side = RIGHT;
+	}
 
         // Update texture with received buffer
-	update_fractal_rows(ogl_state, RIGHT,  work_recv.start_row, work_recv.num_rows, work_recv.pixels);
+	update_fractal_rows(ogl_state, side, work_recv.start_row, work_recv.num_rows, work_recv.pixels);
 
         // Kill slaves
         MPI_Send(0,0,MPI_INT,dest,DIETAG,MPI_COMM_WORLD);
