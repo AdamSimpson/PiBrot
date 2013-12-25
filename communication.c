@@ -161,8 +161,9 @@ void master(FRAC_INFO *frac_left, FRAC_INFO *frac_right, const STATE_T *ogl_stat
     }
 
     printf("sent initial work\n");
+    int num_ranks_complete = 0;    
 
-    while(1) {
+    while(num_ranks_complete < ntasks-1) {
 
 	// Receive work load and unpack
         master_recv_and_unpack(&work_recv, buffer, full_size);
@@ -186,8 +187,10 @@ void master(FRAC_INFO *frac_left, FRAC_INFO *frac_right, const STATE_T *ogl_stat
         // Send more work or kill slaves
         if(work_send.num_rows > 0)
             master_pack_and_send(&work_send, buffer, empty_size);        
- 	else
+ 	else{
             MPI_Send(0,0,MPI_INT,work_send.rank,DIETAG,MPI_COMM_WORLD);
+	    num_ranks_complete++;
+        }
 
     }
 
