@@ -50,7 +50,7 @@ int main(int argc, char *argv[])
             if(key_press == KEY_Q)
                 state.terminate=1;
         }
-        exit_func(&state.egl_state);	
+        exit_ogl(&state.egl_state);	
     }
     else if(myrank == 1)
 	slave(&frac_left);

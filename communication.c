@@ -223,6 +223,7 @@ void slave(FRAC_INFO *frac_info)
 
         // Check tag for work/die
         if(tag == DIETAG) {
+	    free(work.pixels);
             free(buffer);
             return;
         }

@@ -126,7 +126,7 @@ void egl_swap(EGL_STATE_T *state)
     eglSwapBuffers(state->display, state->surface);
 }
 
-void exit_func(EGL_STATE_T *state)
+void exit_ogl(EGL_STATE_T *state)
 // Function to be passed to atexit().
 {
    // clear screen

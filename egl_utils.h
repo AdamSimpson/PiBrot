@@ -18,7 +18,7 @@ typedef struct {
 
 
 void init_ogl(EGL_STATE_T *state);
-void exit_func(EGL_STATE_T *state);
+void exit_ogl(EGL_STATE_T *state);
 void showlog(GLint shader);
 void egl_swap(EGL_STATE_T *state);
 void check();
