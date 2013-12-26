@@ -12,7 +12,7 @@
 
 #include "bcm_host.h"
 
-#define USE_MIPMAP 0
+#define USE_MIPMAP 1
 
 void create_textures(STATE_T *state, FRAC_INFO *frac_left, FRAC_INFO *frac_right)
 {
@@ -46,10 +46,6 @@ void create_textures(STATE_T *state, FRAC_INFO *frac_left, FRAC_INFO *frac_right
     // Load texture
     glTexImage2D(GL_TEXTURE_2D, 0, GL_LUMINANCE, state->tex_width[LEFT], state->tex_height[LEFT], 0, GL_LUMINANCE, GL_UNSIGNED_BYTE, pixels);
 
-    // Set filtering modes
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-
     free(pixels);
 
     #if USE_MIPMAP
@@ -76,9 +72,14 @@ void create_textures(STATE_T *state, FRAC_INFO *frac_left, FRAC_INFO *frac_right
     glGenerateMipmap(GL_TEXTURE_2D);
     #endif
 
-    // Set filtering modes
+    // Set filtering mode for both textures to use
+    #if !(USE_MIPMAP)
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    #else
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+    #endif
 
     // Free pixels
     free(pixels);
