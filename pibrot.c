@@ -60,18 +60,6 @@ int main(int argc, char *argv[])
 		case KEY_S:
 		    show_both_textures(&state);
 		    break;
-		case KEY_1:
-		    set_min_filter(1);
-		case KEY_2:
-		    set_min_filter(2);
-		case KEY_3:
-		    set_min_filter(3);
-		case KEY_4:
-		    set_min_filter(4);
-		case KEY_5:
-		    set_min_filter(5);
-		case KEY_6:
-		    set_min_filter(6);
 		default:
 		    break;
             }
