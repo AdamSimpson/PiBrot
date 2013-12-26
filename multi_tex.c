@@ -61,7 +61,7 @@ void create_textures(STATE_T *state, FRAC_INFO *frac_left, FRAC_INFO *frac_right
         }
     }
  
-    // Set texture unit 1 and bind texture
+    // Bind texture
     glBindTexture(GL_TEXTURE_2D, state->textures[1]);
 
     // Load texture
@@ -84,6 +84,40 @@ void create_textures(STATE_T *state, FRAC_INFO *frac_left, FRAC_INFO *frac_right
     // Free pixels
     free(pixels);
 
+}
+
+void set_min_filter(int i)
+{
+
+    GLint mode;
+    switch(i) {
+        case 1:
+	    mode = GL_NEAREST;
+	    break;
+	case 2:
+	    mode = GL_LINEAR;
+	    break;
+	case 3:
+	    mode = GL_NEAREST_MIPMAP_NEAREST;
+	    break;
+	case 4:
+	    mode = GL_LINEAR_MIPMAP_NEAREST;
+	    break;
+	case 5:
+	    mode = GL_NEAREST_MIPMAP_LINEAR;
+	    break;
+	case 6:
+	    mode = GL_LINEAR_MIPMAP_LINEAR;
+	    break;
+	default:
+	    mode = GL_NEAREST;
+	    break;
+    }
+
+    printf("Setting mode: %d\n", mode);
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, mode);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 }
 
 void update_texture_rows(STATE_T *state, int fractal, GLsizei start_row, GLuint num_rows, GLubyte *row_pixels)

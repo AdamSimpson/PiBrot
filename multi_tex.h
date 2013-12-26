@@ -41,5 +41,6 @@ void draw_textures(STATE_T *state);
 void show_left_tex_fullscreen(STATE_T *state);
 void show_right_tex_fullscreen(STATE_T *state);
 void show_both_textures(STATE_T *state);
+void set_min_filter(int mode);
 
 #endif

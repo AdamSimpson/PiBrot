@@ -14,7 +14,7 @@ int main(int argc, char *argv[])
 
     FRAC_INFO frac_left, frac_right;
     init_fractal(&frac_left, 300);
-    init_fractal(&frac_right, 1024);
+    init_fractal(&frac_right, 1300);
 
     if (myrank == 0){
 
@@ -60,6 +60,18 @@ int main(int argc, char *argv[])
 		case KEY_S:
 		    show_both_textures(&state);
 		    break;
+		case KEY_1:
+		    set_min_filter(1);
+		case KEY_2:
+		    set_min_filter(2);
+		case KEY_3:
+		    set_min_filter(3);
+		case KEY_4:
+		    set_min_filter(4);
+		case KEY_5:
+		    set_min_filter(5);
+		case KEY_6:
+		    set_min_filter(6);
 		default:
 		    break;
             }
