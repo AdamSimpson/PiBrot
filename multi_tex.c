@@ -12,6 +12,8 @@
 
 #include "bcm_host.h"
 
+#define USE_MIPMAP 0
+
 void create_textures(STATE_T *state, FRAC_INFO *frac_left, FRAC_INFO *frac_right)
 {
     int i,j;
@@ -50,8 +52,10 @@ void create_textures(STATE_T *state, FRAC_INFO *frac_left, FRAC_INFO *frac_right
 
     free(pixels);
 
+    #if USE_MIPMAP
     // Generate mipmap
-//    glGenerateMipmap(GL_TEXTURE_2D);
+    glGenerateMipmap(GL_TEXTURE_2D);
+    #endif
 
     // Right image
     pixels = malloc(state->tex_width[RIGHT]*state->tex_height[RIGHT]*sizeof(GLubyte));
@@ -62,14 +66,15 @@ void create_textures(STATE_T *state, FRAC_INFO *frac_left, FRAC_INFO *frac_right
     }
  
     // Set texture unit 1 and bind texture
-//    glActiveTexture(GL_TEXTURE1);
     glBindTexture(GL_TEXTURE_2D, state->textures[1]);
 
     // Load texture
     glTexImage2D(GL_TEXTURE_2D, 0, GL_LUMINANCE, state->tex_width[RIGHT], state->tex_height[RIGHT], 0, GL_LUMINANCE, GL_UNSIGNED_BYTE, pixels);
 
+    #if USE_MIPMAP
     // Generate mipmap
-//    glGenerateMipmap(GL_TEXTURE_2D);
+    glGenerateMipmap(GL_TEXTURE_2D);
+    #endif
 
     // Set filtering modes
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
@@ -79,21 +84,14 @@ void create_textures(STATE_T *state, FRAC_INFO *frac_left, FRAC_INFO *frac_right
     free(pixels);
 
 }
-/*
-void update_texture_row(STATE_T *state, GLuint texture, GLenum tex_unit, GLsizei row, GLubyte *row_pixels)
-{
-//    glActiveTexture(tex_unit);
-    glBindTexture(GL_TEXTURE_2D, texture);
-    glTexSubImage2D(GL_TEXTURE_2D, 0, 0, row, state->tex_width, 1, GL_LUMINANCE, GL_UNSIGNED_BYTE, row_pixels);
-//    glGenerateMipmap(GL_TEXTURE_2D);
-}
-*/
+
 void update_texture_rows(STATE_T *state, int fractal, GLsizei start_row, GLuint num_rows, GLubyte *row_pixels)
 {
-//    glActiveTexture(tex_unit);
     glBindTexture(GL_TEXTURE_2D, state->textures[fractal]);
     glTexSubImage2D(GL_TEXTURE_2D, 0, 0, start_row, state->tex_width[fractal], num_rows, GL_LUMINANCE, GL_UNSIGNED_BYTE, row_pixels);
-//    glGenerateMipmap(GL_TEXTURE_2D);
+    #if USE_MIPMAP
+    glGenerateMipmap(GL_TEXTURE_2D);
+    #endif
 }
 
 // GLUE between outside world and textures - still requires state which I don't like
@@ -110,6 +108,7 @@ void update_fractal_rows(const STATE_T *state, int fractal, unsigned int start_r
 void create_vertices()
 {
     // Vertices: Pos(x,y) Tex(x,y)
+    // For simplicity only single vbo is generated and offset used as needed
     float vertices[] = {
         // Image 0 vertices
         -1.0f,   1.0f, 0.0f, 0.0f, // Top left
@@ -120,7 +119,12 @@ void create_vertices()
          0.005f, 1.0f, 0.0f, 0.0f, // Top left
          1.0f,   1.0f, 1.0f, 0.0f, // Top right
          1.0f,  -1.0f, 1.0f, 1.0f, // Bottom right
-	 0.005f,-1.0f, 0.0f, 1.0f  // Bottom left
+	 0.005f,-1.0f, 0.0f, 1.0f,  // Bottom left
+         // Full screen vertices
+        -1.0f,  1.0f, 0.0f, 0.0f, // Top left
+         1.0f,  1.0f, 1.0f, 0.0f, // Top right
+         1.0f, -1.0f, 1.0f, 1.0f, // Bottom right
+	-1.0f, -1.0f, 0.0f, 1.0f  // Bottom left
     };
 
     // Generate vertex buffer
@@ -129,7 +133,7 @@ void create_vertices()
     // Set buffer
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
     // Fill buffer
-    glBufferData(GL_ARRAY_BUFFER, NUM_TEXTURES*4*4*sizeof(GLfloat), vertices, GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, 3*4*4*sizeof(GLfloat), vertices, GL_STATIC_DRAW);
 
     // Elements
     GLubyte elements[] = {
@@ -143,7 +147,6 @@ void create_vertices()
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
     // Fill buffer
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, 2*3*sizeof(GLubyte), elements, GL_STATIC_DRAW);
-
 }
 
 void create_shaders(STATE_T *state)
@@ -197,6 +200,54 @@ void create_shaders(STATE_T *state)
     state->tex_location = glGetUniformLocation(state->program, "tex");
 }
 
+void show_left_tex_fullscreen(STATE_T *state)
+{
+    // Size of each vertex in bytes
+    size_t vert_size = 4*sizeof(GL_FLOAT);
+    // Offset in our vertices array that the full screen vertices start
+    size_t offset = 2*4*vert_size;
+
+    // Draw left fractal
+    glVertexAttribPointer(state->position_location, 2, GL_FLOAT, GL_FALSE, vert_size, (void*)offset);
+    glEnableVertexAttribArray(state->position_location);
+    glVertexAttribPointer(state->tex_coord_location, 2, GL_FLOAT, GL_FALSE, vert_size,(void*)offset+2*sizeof(GL_FLOAT));
+    glEnableVertexAttribArray(state->tex_coord_location);
+    glBindTexture(GL_TEXTURE_2D, state->textures[LEFT]);
+    glUniform1i(state->tex_location, 0);
+    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_BYTE, 0);
+
+   // Swap buffers
+   egl_swap(&state->egl_state);
+
+}
+
+void show_right_tex_fullscreen(STATE_T *state)
+{
+    // Size of each vertex in bytes
+    size_t vert_size = 4*sizeof(GL_FLOAT);
+    // Offset in our vertices array that the full screen vertices start
+    size_t offset = 2*4*vert_size;
+
+    // Draw left fractal
+    glVertexAttribPointer(state->position_location, 2, GL_FLOAT, GL_FALSE, vert_size, (void*)offset);
+    glEnableVertexAttribArray(state->position_location);
+    glVertexAttribPointer(state->tex_coord_location, 2, GL_FLOAT, GL_FALSE, vert_size,(void*)offset+2*sizeof(GL_FLOAT));
+    glEnableVertexAttribArray(state->tex_coord_location);
+    glBindTexture(GL_TEXTURE_2D, state->textures[RIGHT]);
+    glUniform1i(state->tex_location, 0);
+    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_BYTE, 0);
+
+    // Swap buffers
+    egl_swap(&state->egl_state);
+
+}
+
+void show_both_textures(STATE_T *state)
+{
+    draw_textures(state);
+    egl_swap(&state->egl_state);
+}
+
 void draw_textures(STATE_T *state)
 {
     glClearColor(0.5f, 0.5f, 0.5f, 1.0f);
@@ -215,9 +266,11 @@ void draw_textures(STATE_T *state)
     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_BYTE, 0);
 
     // Draw right fractal
-    glVertexAttribPointer(state->position_location, 2, GL_FLOAT, GL_FALSE, vert_size, (void*)(4*vert_size));
+    // Offset in vertices array that right texture will use
+    size_t offset = 4*vert_size; 
+    glVertexAttribPointer(state->position_location, 2, GL_FLOAT, GL_FALSE, vert_size, (void*)offset);
     glEnableVertexAttribArray(state->position_location);
-    glVertexAttribPointer(state->tex_coord_location, 2, GL_FLOAT, GL_FALSE, vert_size,(void*)(4*vert_size+2*sizeof(GL_FLOAT)));
+    glVertexAttribPointer(state->tex_coord_location, 2, GL_FLOAT, GL_FALSE, vert_size,(void*)(offset+2*sizeof(GL_FLOAT)));
     glEnableVertexAttribArray(state->tex_coord_location);
     glBindTexture(GL_TEXTURE_2D, state->textures[RIGHT]);
     glUniform1i(state->tex_location, 0);

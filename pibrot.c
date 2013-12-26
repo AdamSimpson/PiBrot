@@ -47,8 +47,23 @@ int main(int argc, char *argv[])
 	while(!state.terminate) {
             // Check for keyboard input
             int key_press = get_key_press(&state.egl_state);        
-            if(key_press == KEY_Q)
-                state.terminate=1;
+	    switch(key_press){
+	        case KEY_Q: 
+		    state.terminate=1;
+	            break;
+		case KEY_A:
+		    show_left_tex_fullscreen(&state);
+		    break;     
+		case KEY_D:
+		    show_right_tex_fullscreen(&state);
+		    break;
+		case KEY_S:
+		    show_both_textures(&state);
+		    break;
+		default:
+		    break;
+            }
+
         }
         exit_ogl(&state.egl_state);	
     }

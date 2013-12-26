@@ -38,5 +38,8 @@ void create_textures(STATE_T *state, FRAC_INFO *frac_left, FRAC_INFO *frac_right
 void create_vertices();
 void create_shaders(STATE_T *state);
 void draw_textures(STATE_T *state);
+void show_left_tex_fullscreen(STATE_T *state);
+void show_right_tex_fullscreen(STATE_T *state);
+void show_both_textures(STATE_T *state);
 
 #endif
