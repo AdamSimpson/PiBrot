@@ -18,10 +18,12 @@ typedef struct
     double y_start;
     double radius;
     double spacing;
+    int channels; // Number of color channels per pixel
 } FRAC_INFO;
 
-
+void MSetColorPixels(FRAC_INFO *info, unsigned char* pixels,  double cx, double cy);
 unsigned char MSetPixel(const FRAC_INFO *info, double cx, double cy);
+void calcColorPixels(const FRAC_INFO *info, WORK_DATA *data);
 void calcPixels(const FRAC_INFO *info, WORK_DATA *data);
 void init_fractal(FRAC_INFO *info, int pixel_width);
 
