@@ -10,7 +10,7 @@
 void MSetColorPixels(FRAC_INFO *info, unsigned char* pixels,  double cx, double cy)
 {
     static const int maxIter = 10000;
-    static const double binBailout = 300;
+    static const double binBailout = 500;
     static const double escape_radius = 1e120;
     static const double overflow = 1e300;
 
@@ -36,9 +36,6 @@ void MSetColorPixels(FRAC_INFO *info, unsigned char* pixels,  double cx, double 
 
     while(iter < maxIter)
     {
-        if(flag)
-            break;
-
         tmp = x2-y2+cx;
         y = 2*x*y+cy;
         x = tmp;
@@ -64,8 +61,8 @@ void MSetColorPixels(FRAC_INFO *info, unsigned char* pixels,  double cx, double 
         // If the point has escaped collect the distance and continuous dwell
         if (magnitude2 > escape_radius) {
             distance = log(magnitude2)*magnitude/sqrt(xder*xder+yder*yder);
-	    cont_dwell = (float)iter + log2(log2(magnitude2)) - log2(log2(escape_radius)); // MuEncy
-	    //cont_dwell = (float)iter - log(log(magnitude)/log(escape_radius)); // Wikipedia continuous coloring
+	    cont_dwell = (float)iter + log2(log2(magnitude)) - log2(log2(escape_radius)); // MuEncy
+//	    cont_dwell = (float)iter - log(log(magnitude)/log(escape_radius)); // Wikipedia continuous coloring
             break;
         }
 
@@ -105,7 +102,7 @@ void MSetColorPixels(FRAC_INFO *info, unsigned char* pixels,  double cx, double 
 
     if(P < 0.5) {
 	P = 1.0 - 1.5*P;
-	angle = 1 - P;
+	angle = 1.0 - P;
 	rad = sqrt(P);
     }
     else {
@@ -116,7 +113,7 @@ void MSetColorPixels(FRAC_INFO *info, unsigned char* pixels,  double cx, double 
 
     if(dwell%2) {
         value *= 0.85;
-	radius *= 0.667;
+	rad *= 0.667;
     }
 
     if(y_bailout < 0.0)
@@ -137,7 +134,7 @@ void MSetColorPixels(FRAC_INFO *info, unsigned char* pixels,  double cx, double 
     double c,X,r1,g1,b1;
     c = value * saturation;
 
-    hp = hue/60.0;
+    hp = (int)(hue/60.0);
 
     X = c * (1 - abs(hp%2-1));
    
@@ -166,7 +163,7 @@ void MSetColorPixels(FRAC_INFO *info, unsigned char* pixels,  double cx, double 
 	g1 = 0.0;
 	b1 = c;
     }
-    else if(hp >= 5 && hp < 6) {
+    else if(hp >= 5 && hp <= 6) {
         r1 = c;
 	g1 = 0.0;
 	b1 = x;
@@ -309,10 +306,10 @@ void calcColorPixels(const FRAC_INFO *info, WORK_DATA *data)
 void init_fractal(FRAC_INFO *info, int pixel_width)
 {
     //Dimensions of grid
-    double xMin = -2.0;//-.745429-0.000005;
-    double xMax = 1.0;//xMin + 0.000010;
-    double yMin = -1.0;//0.113008-0.000005;
-    double yMax = 1.0;//yMin + 0.000010;
+    double xMin = -.745429-0.000005;
+    double xMax = xMin + 0.000010;
+    double yMin = 0.113008-0.000005;
+    double yMax = yMin + 0.000010;
 
     #if USE_COLOR
     info->channels = 3;
