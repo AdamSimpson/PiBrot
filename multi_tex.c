@@ -27,7 +27,7 @@ void create_textures(STATE_T *state, FRAC_INFO *frac_left, FRAC_INFO *frac_right
     state->tex_height[RIGHT] = frac_right->num_rows;
 
     size_t pixel_bytes;
-    pixel_bytes = state->tex_width[LEFT]*state->tex_height[LEFT]*sizeof(GLuint)*frac_left->channels;
+    pixel_bytes = state->tex_width[LEFT]*state->tex_height[LEFT]*sizeof(GLubyte)*frac_left->channels;
  
     // Left fractal
     pixels = malloc(pixel_bytes);
@@ -48,7 +48,7 @@ void create_textures(STATE_T *state, FRAC_INFO *frac_left, FRAC_INFO *frac_right
             }
         }
     }
-      
+ 
     // Bind texture
     glBindTexture(GL_TEXTURE_2D, state->textures[LEFT]);
 
@@ -76,7 +76,7 @@ void create_textures(STATE_T *state, FRAC_INFO *frac_left, FRAC_INFO *frac_right
     free(pixels);
 
     // Right fractal
-    pixel_bytes = state->tex_width[RIGHT]*state->tex_height[RIGHT]*sizeof(GLuint)*frac_right->channels; 
+    pixel_bytes = state->tex_width[RIGHT]*state->tex_height[RIGHT]*sizeof(GLubyte)*frac_right->channels; 
     pixels = malloc(pixel_bytes);
 
     // Initialize right texture to white

@@ -4,6 +4,8 @@
 #include <stdbool.h>
 #include "fractal.h"
 
+#define USE_COLOR 1
+
 // Full color Mu-Ency implimentation, distance est./binary decomp./cont. dwell
 void MSetColorPixels(FRAC_INFO *info, unsigned char* pixels,  double cx, double cy)
 {
@@ -73,9 +75,9 @@ void MSetColorPixels(FRAC_INFO *info, unsigned char* pixels,  double cx, double 
 
     // If point is in mandelbrot set set to white
     if(iter >= maxIter) {
-        pixels[0] = 1.0;
-        pixels[1] = 1.0;
-        pixels[2] = 1.0;
+        pixels[0] = 255;
+        pixels[1] = 255;
+        pixels[2] = 255;
         return;
     }
 
@@ -174,13 +176,13 @@ void MSetColorPixels(FRAC_INFO *info, unsigned char* pixels,  double cx, double 
 
     unsigned char r,g,b;
 
-    r = (r1+m) * 255;
-    g = (g1+m) * 255;
-    b = (b1+m) * 255;
+    r = (unsigned char)((r1+m) * 255.0);
+    g = (unsigned char)((g1+m) * 255.0);
+    b = (unsigned char)((b1+m) * 255.0);
 
-    pixels[0] = r1;
-    pixels[1] = g1;
-    pixels[2] = b1;
+    pixels[0] = r;
+    pixels[1] = g;
+    pixels[2] = b;
 }
 
 // Greyscale hybrid distance estimator/binary decomposition
