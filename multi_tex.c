@@ -44,7 +44,7 @@ void create_textures(STATE_T *state, FRAC_INFO *frac_left, FRAC_INFO *frac_right
     for(i=0; i<state->tex_height[LEFT]; i++) {
         for(j=0; j<state->tex_width[LEFT]; j++) {
             for(k=0; k<frac_left->channels; k++) {
-                pixels[(i*state->tex_width[LEFT] + j)*frac_left->channels + k] = 0;
+                pixels[(i*state->tex_width[LEFT] + j)*frac_left->channels + k] = 255;
             }
         }
     }
@@ -67,6 +67,8 @@ void create_textures(STATE_T *state, FRAC_INFO *frac_left, FRAC_INFO *frac_right
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     #endif
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
     #if USE_MIPMAP
     // Generate mipmap
@@ -83,7 +85,7 @@ void create_textures(STATE_T *state, FRAC_INFO *frac_left, FRAC_INFO *frac_right
     for(i=0; i<state->tex_height[RIGHT]; i++) {
         for(j=0; j<state->tex_width[RIGHT]; j++) {
             for(k=0; k<frac_right->channels; k++) {
-                pixels[(i*state->tex_width[RIGHT] + j)*frac_right->channels + k] = 255;
+                pixels[(i*state->tex_width[RIGHT] + j)*frac_right->channels + k] = 0;
             }
         }
     }
@@ -106,6 +108,10 @@ void create_textures(STATE_T *state, FRAC_INFO *frac_left, FRAC_INFO *frac_right
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     #endif
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
 
     #if USE_MIPMAP
     // Generate mipmap
