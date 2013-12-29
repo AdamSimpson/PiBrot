@@ -12,7 +12,6 @@ void MSetColorPixels(FRAC_INFO *info, unsigned char* pixels,  double cx, double 
     static const int maxIter = 10000;
     static const double binBailout = 500;
     static const double escape_radius = 1e120;
-    static const double overflow = 1e300;
 
     double spacing = info->spacing;
     double radius = info->radius;
@@ -24,7 +23,6 @@ void MSetColorPixels(FRAC_INFO *info, unsigned char* pixels,  double cx, double 
     double xOrbit = 0.0, yOrbit = 0.0;
     int iter = 0;
     double tmp;
-    bool flag = false;
     double xder = 0.0, yder = 0.0;
     bool binBailed = false;
     double magnitude = 0.0;
@@ -32,7 +30,7 @@ void MSetColorPixels(FRAC_INFO *info, unsigned char* pixels,  double cx, double 
 
     double distance = 0.0;
     double y_bailout = 0.0;
-    double cont_dwell = 0.0;
+    double cont_dwell_fractional = 0.0;
 
     while(iter < maxIter)
     {
@@ -46,7 +44,6 @@ void MSetColorPixels(FRAC_INFO *info, unsigned char* pixels,  double cx, double 
         tmp = 2*(xOrbit*xder-yOrbit*yder)+1;
         yder = 2*(yOrbit*xder + xOrbit*yder);
         xder = tmp;
-        flag = fmax(fabs(xder), fabs(yder)) > overflow;
 
         magnitude2 = x2 + y2;
         magnitude =  sqrt(x2 + y2);
@@ -61,8 +58,8 @@ void MSetColorPixels(FRAC_INFO *info, unsigned char* pixels,  double cx, double 
         // If the point has escaped collect the distance and continuous dwell
         if (magnitude2 > escape_radius) {
             distance = log(magnitude2)*magnitude/sqrt(xder*xder+yder*yder);
-	    cont_dwell = (float)iter + log2(log2(magnitude)) - log2(log2(escape_radius)); // MuEncy
-//	    cont_dwell = (float)iter - log(log(magnitude)/log(escape_radius)); // Wikipedia continuous coloring
+	    cont_dwell_fractional = log2(log2(magnitude)) - log2(log2(escape_radius)); // MuEncy
+//	    cont_dwell_fractional = -1.0 * log(log(magnitude)/log(escape_radius)); // Wikipedia continuous coloring
             break;
         }
 
@@ -86,8 +83,8 @@ void MSetColorPixels(FRAC_INFO *info, unsigned char* pixels,  double cx, double 
     double d_scale;
     double P;
 
-    dwell = floor(cont_dwell);
-    final_rad = cont_dwell - dwell; 
+    dwell = iter;
+    final_rad = cont_dwell_fractional; 
     d_scale = log2(distance / spacing);
 
     // Calculate brightness(Value)
@@ -119,72 +116,78 @@ void MSetColorPixels(FRAC_INFO *info, unsigned char* pixels,  double cx, double 
     if(y_bailout < 0.0)
 	angle = angle + 0.02;
 
-    angle = angle + 0.0001 * final_rad;
+    angle = angle + (0.0001 * final_rad);
 
     hue = angle * 10.0;
     hue = hue - floor(hue);
     saturation = rad - floor(rad);
 
-    // convert HSV to RGB using wikipedia algorithm
+    // convert HSV to RGB
 
     // convert hue to degrees
     hue = hue*360.0;
 
-    int hp;
-    double c,X,r1,g1,b1;
-    c = value * saturation;
+    if(saturation <= 0.0) {
+        pixels[0] = (unsigned char)(value * 255.0);
+	pixels[1] = (unsigned char)(value * 255.0);
+	pixels[2] = (unsigned char)(value * 255.0);
+        return;
+    }
+    double hh, p, q, t, ff, r, g, b;
+    long i;
 
-    hp = (int)(hue/60.0);
+    hh = hue;
+    if(hh >= 360.0)
+	hh = 0.0;
+    hh /= 60.0;
+    i = (long)hh;
+    ff = hh - i;
+    p = value * (1.0 - saturation);
+    q = value * (1.0 - (saturation * ff));
+    t = value * (1.0 - (saturation * (1.0 - ff)));
 
-    X = c * (1 - abs(hp%2-1));
-   
-    if(hp >= 0 && hp < 1){
-        r1 = c;
-        g1 = X;
-        b1 = 0.0; 
-    }
-    else if(hp >= 1 && hp < 2) {
-        r1 = X;
-	g1 = c;
-	b1 = 0.0;
-    }
-    else if(hp >= 2 && hp < 3) {
-        r1 = 0.0;
-	g1 = c;
-	b1 = X;
-    }
-    else if(hp >= 3 && hp < 4) {
-        r1 = 0.0;
-	g1 = X;
-	b1 = c;
-    }
-    else if(hp >= 4 && hp < 5) {
-        r1 = X;
-	g1 = 0.0;
-	b1 = c;
-    }
-    else if(hp >= 5 && hp <= 6) {
-        r1 = c;
-	g1 = 0.0;
-	b1 = x;
-    }
-    else {
-	r1 = 0.0;
-	g1 = 0.0;
-	b1 = 0.0;
+    switch(i) {
+        case 0:
+	    r = value;
+	    g = t;
+	    b = p;
+	    break;
+	case 1:
+	    r = q;
+	    g = value;
+	    b = p;
+	    break;
+	case 2:
+	    r = p;
+	    g = value;
+	    b = t;
+	    break;
+	case 3:
+	    r = p;
+	    g = q;
+	    b = value;
+	    break;
+        case 4:
+	    r = t;
+	    g = p;
+	    b = value;
+	case 5:
+	default:
+	    r = value;
+	    g = p;
+	    b = q;
+	    break;
     }
 
-    double m = value - c;
+    unsigned char rc,gc,bc;
 
-    unsigned char r,g,b;
+    rc = (unsigned char)(r * 255.0);
+    gc = (unsigned char)(g * 255.0);
+    bc = (unsigned char)(b * 255.0);
 
-    r = (unsigned char)((r1+m) * 255.0);
-    g = (unsigned char)((g1+m) * 255.0);
-    b = (unsigned char)((b1+m) * 255.0);
-
-    pixels[0] = r;
-    pixels[1] = g;
-    pixels[2] = b;
+    pixels[0] = rc;
+    pixels[1] = gc;
+    pixels[2] = bc;
 }
 
 // Greyscale hybrid distance estimator/binary decomposition
