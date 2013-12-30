@@ -11,7 +11,7 @@ void MSetColorPixels(FRAC_INFO *info, unsigned char* pixels,  double cx, double 
 {
     static const int maxIter = 10000;
     static const double binBailout = 500;
-    static const double escape_radius = 1e120;
+    static const double escape_radius = 1000;//1e120;
 
     double spacing = info->spacing;
     double radius = info->radius;
@@ -50,16 +50,21 @@ void MSetColorPixels(FRAC_INFO *info, unsigned char* pixels,  double cx, double 
 
         //If too large of a bailout is used the binary looks bad
         //This should collect the first y after we reach binBailout
-        if(magnitude2 > binBailout && !binBailed) {
+/*        if(magnitude2 > binBailout && !binBailed) {
             y_bailout = y;
             binBailed =  true;
         }
+*/
+
+//        if(iter < 10)
+//	    y_bailout = y;
 
         // If the point has escaped collect the distance and continuous dwell
         if (magnitude2 > escape_radius) {
             distance = log(magnitude2)*magnitude/sqrt(xder*xder+yder*yder);
 	    cont_dwell_fractional = log2(log2(magnitude)) - log2(log2(escape_radius)); // MuEncy
 //	    cont_dwell_fractional = -1.0 * log(log(magnitude)/log(escape_radius)); // Wikipedia continuous coloring
+	    y_bailout = y;
             break;
         }
 
@@ -109,7 +114,7 @@ void MSetColorPixels(FRAC_INFO *info, unsigned char* pixels,  double cx, double 
     }
 
     if(dwell%2) {
-        value *= 0.85;
+        value *= 0.90;
 	rad *= 0.667;
     }
 
