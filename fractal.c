@@ -9,8 +9,8 @@
 // Full color Mu-Ency implimentation, distance est./binary decomp./cont. dwell
 void MSetColorPixels(FRAC_INFO *info, unsigned char* pixels,  double cx, double cy)
 {
-    static const int maxIter = 10000;
-    static const double binBailout = 500;
+    static const int maxIter = 20000;
+//    static const double binBailout = 500;
     static const double escape_radius = 1000;//1e120;
 
     double spacing = info->spacing;
@@ -62,8 +62,8 @@ void MSetColorPixels(FRAC_INFO *info, unsigned char* pixels,  double cx, double 
         // If the point has escaped collect the distance and continuous dwell
         if (magnitude2 > escape_radius) {
             distance = log(magnitude2)*magnitude/sqrt(xder*xder+yder*yder);
-	    cont_dwell_fractional = log2(log2(magnitude)) - log2(log2(escape_radius)); // MuEncy
-//	    cont_dwell_fractional = -1.0 * log(log(magnitude)/log(escape_radius)); // Wikipedia continuous coloring
+//	    cont_dwell_fractional = log2(log2(magnitude)) - log2(log2(escape_radius)); // MuEncy
+	    cont_dwell_fractional = -1.0 * log(log(magnitude)/log(escape_radius)); // Wikipedia continuous coloring
 	    y_bailout = y;
             break;
         }
@@ -176,7 +176,12 @@ void MSetColorPixels(FRAC_INFO *info, unsigned char* pixels,  double cx, double 
 	    r = t;
 	    g = p;
 	    b = value;
+	    break;
 	case 5:
+	    r = value;
+	    g = p;
+	    b = q;
+	    break;
 	default:
 	    r = value;
 	    g = p;
@@ -314,10 +319,11 @@ void calcColorPixels(const FRAC_INFO *info, WORK_DATA *data)
 void init_fractal(FRAC_INFO *info, int pixel_width)
 {
     //Dimensions of grid
-    double xMin = -.745429-0.000005;
-    double xMax = xMin + 0.000010;
-    double yMin = 0.113008-0.000005;
-    double yMax = yMin + 0.000010;
+    double rad = 0.0004437/2.0;
+    double xMin = -1.2494989 - rad;//-.745429-0.000005;
+    double xMax = xMin + 2.0*rad;//xMin + 0.000010;
+    double yMin = -0.0303330 - rad;//0.113008-0.000005;
+    double yMax = yMin + 2.0*rad;//yMin + 0.000010;
 
     #if USE_COLOR
     info->channels = 3;
