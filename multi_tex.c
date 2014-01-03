@@ -12,7 +12,7 @@
 
 #include "bcm_host.h"
 
-#define USE_MIPMAP 1
+#define USE_MIPMAP 0
 #define USE_COLOR 1
 
 void create_textures(STATE_T *state, FRAC_INFO *frac_left, FRAC_INFO *frac_right)
@@ -61,7 +61,7 @@ void create_textures(STATE_T *state, FRAC_INFO *frac_left, FRAC_INFO *frac_right
 
     // Set filtering modes
     #if !(USE_MIPMAP)
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     #else
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
