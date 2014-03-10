@@ -229,8 +229,11 @@ void slave(FRAC_INFO *frac_info)
         }
 
         // calcPixels
-        calcColorPixels(frac_info, &work);        
-
+        if(frac_info->color)
+            calcColorPixels(frac_info, &work);        
+        else
+	    calcPixels(frac_info, &work);
+        
         // Pack and send data back
         slave_pack_and_send(&work, frac_info, buffer, full_size);
     }

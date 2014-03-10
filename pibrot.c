@@ -13,8 +13,8 @@ int main(int argc, char *argv[])
     MPI_Comm_rank(MPI_COMM_WORLD, &myrank);
 
     FRAC_INFO frac_left, frac_right;
-    init_fractal(&frac_left, 300);
-    init_fractal(&frac_right, 1024);
+    init_fractal(&frac_left, true, 2047);
+    init_fractal(&frac_right, true, 2047);
 
     if (myrank == 0){
 

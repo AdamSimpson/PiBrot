@@ -13,7 +13,6 @@
 #include "bcm_host.h"
 
 #define USE_MIPMAP 0
-#define USE_COLOR 1
 
 void create_textures(STATE_T *state, FRAC_INFO *frac_left, FRAC_INFO *frac_right)
 {
@@ -53,18 +52,15 @@ void create_textures(STATE_T *state, FRAC_INFO *frac_left, FRAC_INFO *frac_right
     glBindTexture(GL_TEXTURE_2D, state->textures[LEFT]);
 
     // Load texture
-    #if USE_COLOR
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, state->tex_width[LEFT], state->tex_height[LEFT], 0, GL_RGB, GL_UNSIGNED_BYTE, pixels);
-    #else
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_LUMINANCE, state->tex_width[LEFT], state->tex_height[LEFT], 0, GL_LUMINANCE, GL_UNSIGNED_BYTE, pixels);
-    #endif
+//    glTexImage2D(GL_TEXTURE_2D, 0, GL_LUMINANCE, state->tex_width[LEFT], state->tex_height[LEFT], 0, GL_LUMINANCE, GL_UNSIGNED_BYTE, pixels);
 
     // Set filtering modes
     #if !(USE_MIPMAP)
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     #else
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     #endif
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
@@ -94,11 +90,8 @@ void create_textures(STATE_T *state, FRAC_INFO *frac_left, FRAC_INFO *frac_right
     glBindTexture(GL_TEXTURE_2D, state->textures[1]);
 
     // Load texture
-    #if USE_COLOR
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, state->tex_width[RIGHT], state->tex_height[RIGHT], 0, GL_RGB, GL_UNSIGNED_BYTE, pixels);
-    #else
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_LUMINANCE, state->tex_width[RIGHT], state->tex_height[RIGHT], 0, GL_LUMINANCE, GL_UNSIGNED_BYTE, pixels);
-    #endif
+//  glTexImage2D(GL_TEXTURE_2D, 0, GL_LUMINANCE, state->tex_width[RIGHT], state->tex_height[RIGHT], 0, GL_LUMINANCE, GL_UNSIGNED_BYTE, pixels);
 
     // Set filtering modes
     #if !(USE_MIPMAP)
@@ -127,11 +120,8 @@ void update_texture_rows(STATE_T *state, int fractal, GLsizei start_row, GLuint 
 {
     glBindTexture(GL_TEXTURE_2D, state->textures[fractal]);
 
-    #if USE_COLOR
     glTexSubImage2D(GL_TEXTURE_2D, 0, 0, start_row, state->tex_width[fractal], num_rows, GL_RGB, GL_UNSIGNED_BYTE, row_pixels);
-    #else
-    glTexSubImage2D(GL_TEXTURE_2D, 0, 0, start_row, state->tex_width[fractal], num_rows, GL_LUMINANCE, GL_UNSIGNED_BYTE, row_pixels);
-    #endif
+//    glTexSubImage2D(GL_TEXTURE_2D, 0, 0, start_row, state->tex_width[fractal], num_rows, GL_LUMINANCE, GL_UNSIGNED_BYTE, row_pixels);
 
     #if USE_MIPMAP
     glGenerateMipmap(GL_TEXTURE_2D);
