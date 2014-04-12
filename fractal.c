@@ -4,7 +4,7 @@
 #include <stdbool.h>
 #include "fractal.h"
 
-unsigned char MSetPixel(const FRAC_INFO *info, double cx, double cy)
+unsigned char MSetPixel(FRAC_INFO *info, double cx, double cy)
 {
 
     static const int maxIter = 500;
@@ -79,7 +79,7 @@ unsigned char MSetPixel(const FRAC_INFO *info, double cx, double cy)
 
 }
 
-void calcPixels(const FRAC_INFO *info, WORK_DATA *data)
+void calcPixels(FRAC_INFO *info, WORK_DATA *data)
 {
     int nx = info->num_cols;
     int ny = data->num_rows;

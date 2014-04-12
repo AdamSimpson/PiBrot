@@ -21,8 +21,8 @@ typedef struct
 } FRAC_INFO;
 
 
-unsigned char MSetPixel(const FRAC_INFO *info, double cx, double cy);
-void calcPixels(const FRAC_INFO *info, WORK_DATA *data);
+unsigned char MSetPixel(FRAC_INFO *info, double cx, double cy);
+void calcPixels(FRAC_INFO *info, WORK_DATA *data);
 void init_fractal(FRAC_INFO *info, int pixel_width);
 
 #endif

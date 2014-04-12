@@ -6,8 +6,8 @@
 #include "fractal.h"
 
 void get_work(FRAC_INFO *info, WORK_DATA *work);
-int  get_max_work_size(const FRAC_INFO *info);
-void master(FRAC_INFO *frac_left, FRAC_INFO *frac_right, const STATE_T *ogl_state);
+int  get_max_work_size(FRAC_INFO *info);
+void master(FRAC_INFO *frac_left, FRAC_INFO *frac_right, STATE_T *ogl_state);
 void slave(FRAC_INFO *info);
 void master_pack_and_send(WORK_DATA *work, char *pack_buffer, int buffer_size);
 int  master_recv_and_unpack(WORK_DATA *work, char *pack_buffer, int buffer_size);

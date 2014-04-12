@@ -33,7 +33,7 @@ typedef struct
 } STATE_T;
 
 void update_texture_rows(STATE_T *state, int fractal, GLsizei start_row, GLuint num_rows, GLubyte *row_pixels);
-void update_fractal_rows(const STATE_T *state, int fractal, unsigned int start_row, unsigned int num_rows, unsigned char *row_pixels);
+void update_fractal_rows(STATE_T *state, int fractal, unsigned int start_row, unsigned int num_rows, unsigned char *row_pixels);
 void create_textures(STATE_T *state, FRAC_INFO *frac_left, FRAC_INFO *frac_right);
 void create_vertices();
 void create_shaders(STATE_T *state);

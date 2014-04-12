@@ -27,7 +27,7 @@ void get_work(FRAC_INFO  *info, WORK_DATA *work)
 
 }
 
-int get_max_work_size(const FRAC_INFO *info)
+int get_max_work_size(FRAC_INFO *info)
 {
     return MAX_ROWS*info->num_cols;
 }
@@ -101,7 +101,7 @@ int slave_recv_and_unpack(WORK_DATA *work, char *pack_buffer, int buffer_size)
     return tag;
 }
 
-void master(FRAC_INFO *frac_left, FRAC_INFO *frac_right, const STATE_T *ogl_state)
+void master(FRAC_INFO *frac_left, FRAC_INFO *frac_right, STATE_T *ogl_state)
 {
     int ntasks, dest, side;
     WORK_DATA work_send;

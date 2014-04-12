@@ -106,7 +106,7 @@ void update_texture_rows(STATE_T *state, int fractal, GLsizei start_row, GLuint 
 }
 
 // GLUE between outside world and textures - still requires state which I don't like
-void update_fractal_rows(const STATE_T *state, int fractal, unsigned int start_row, unsigned int num_rows, unsigned char *row_pixels)
+void update_fractal_rows(STATE_T *state, int fractal, unsigned int start_row, unsigned int num_rows, unsigned char *row_pixels)
 {
    update_texture_rows(state, fractal, (GLsizei)start_row, (GLsizei)num_rows, (GLubyte*)row_pixels);
    // Draw textures
