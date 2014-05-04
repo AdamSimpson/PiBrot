@@ -29,7 +29,7 @@ void get_work(FRAC_INFO  *info, WORK_DATA *work)
 
 int get_max_work_size(FRAC_INFO *info)
 {
-    return MAX_ROWS*info->num_cols;
+    return MAX_ROWS*info->num_cols*info->channels;
 }
 
 void master_pack_and_send(WORK_DATA *work, char *pack_buffer, int buffer_size)
@@ -61,7 +61,7 @@ int master_recv_and_unpack(WORK_DATA *work, char *pack_buffer, int buffer_size)
 
     MPI_Unpack(pack_buffer, msg_size, &position, &work->start_row,1,MPI_INT, MPI_COMM_WORLD);
     MPI_Unpack(pack_buffer, msg_size, &position, &work->num_rows,1,MPI_INT, MPI_COMM_WORLD);
-    num_pixels = msg_size - position;
+    num_pixels = msg_size - position; // Assumes pixel channels are 1 byte each
     MPI_Unpack(pack_buffer, msg_size, &position, work->pixels, num_pixels, MPI_UNSIGNED_CHAR, MPI_COMM_WORLD);
 
     return tag;
@@ -75,7 +75,7 @@ void slave_pack_and_send(WORK_DATA *work, FRAC_INFO *frac_info, char *pack_buffe
     position = 0;
     MPI_Pack(&work->start_row,1,MPI_INT,pack_buffer, buffer_size,&position, MPI_COMM_WORLD);
     MPI_Pack(&work->num_rows,1,MPI_INT,pack_buffer, buffer_size,&position, MPI_COMM_WORLD);
-    MPI_Pack(work->pixels, work->num_rows*frac_info->num_cols, MPI_UNSIGNED_CHAR, pack_buffer, buffer_size, &position, MPI_COMM_WORLD);
+    MPI_Pack(work->pixels, work->num_rows*frac_info->num_cols*frac_info->channels, MPI_UNSIGNED_CHAR, pack_buffer, buffer_size, &position, MPI_COMM_WORLD);
     MPI_Send(pack_buffer, position, MPI_PACKED, 0, WORKTAG, MPI_COMM_WORLD);
 }
 
@@ -229,8 +229,11 @@ void slave(FRAC_INFO *frac_info)
         }
 
         // calcPixels
-        calcPixels(frac_info, &work);        
-
+        if(frac_info->color)
+            calcColorPixels(frac_info, &work);        
+        else
+	    calcPixels(frac_info, &work);
+        
         // Pack and send data back
         slave_pack_and_send(&work, frac_info, buffer, full_size);
     }
