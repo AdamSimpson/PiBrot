@@ -208,7 +208,7 @@ void handle_key(gl_t *state, struct input_event *event)
     {
         switch(event->code)
         {
-            case KEY_BACK:
+            case KEY_TAB:
                 toggle_quit_mode(render_state);
                 break;
             case KEY_A:
