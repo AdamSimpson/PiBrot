@@ -56,7 +56,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "egl_utils.h"
 #include "linux/input.h"
 #include "renderer.h"
-#include "controls.h"
+#include "exit_menu_gl.h"
+#include "start_menu_gl.h"
 
 bool window_should_close(gl_t *state)
 {
@@ -207,14 +208,14 @@ void handle_key(gl_t *state, struct input_event *event)
     {
         switch(event->code)
         {
-            case KEY_ESC:
+            case KEY_BACK:
                 toggle_quit_mode(render_state);
                 break;
-            case GLFW_KEY_A:
+            case KEY_A:
                 if(!render_state->started)
                     check_start_race(render_state);
                 if(render_state->quit_mode)
-                    check_exit_with_selected_program(render_state, window);
+                    check_exit_with_selected_program(render_state, state);
                 break;
         }
     }
@@ -294,9 +295,6 @@ void process_controller_events(gl_t *state, int controller_fd)
     bytes = read(controller_fd, events, sizeof(events));
     if(bytes > 0)
     {
-        // Let renderer know of activity
-        set_activity_time(render_state);
-
         length =  bytes/sizeof(struct input_event);
 
         // Process events based on type
@@ -340,18 +338,18 @@ void pixel_to_gl(gl_t *state, int pixel_x, int pixel_y, float *gl_x, float *gl_y
 }
 
 // Exit and set return value for specific program if one selected
-void check_exit_with_selected_program(render_t *render_state, GLFWwindow* window)
+void check_exit_with_selected_program(render_t *render_state, gl_t *gl_state)
 {
     if(render_state->exit_menu_state->mandelbrot_state->selected) {
-        glfwSetWindowShouldClose(window, GL_TRUE);
+        gl_state->window_should_close = true;
         render_state->return_value = 10;
     }
     else if (render_state->exit_menu_state->sph_state->selected) {
-        glfwSetWindowShouldClose(window, GL_TRUE);
+        gl_state->window_should_close = true;
         render_state->return_value = 20;
     }
     else if (render_state->exit_menu_state->terminal_state->selected) {
-        glfwSetWindowShouldClose(window, GL_TRUE);
+        gl_state->window_should_close = true;
         render_state->return_value = 0;
     }
 }

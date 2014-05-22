@@ -37,8 +37,8 @@ void init_start_menu(start_menu_t *state, gl_t *gl_state)
 
     // Initialize cursor
     state->cursor_state = malloc(sizeof(cursor_t));
-    int cursor_width = 30;
-    int cursor_height = 40;
+    int cursor_width = 120;
+    int cursor_height = 160;
     #ifdef RASPI
     init_cursor(state->cursor_state, gl_state, "PiBrot/images/cursor.png", cursor_width, cursor_height);
     #else
