@@ -268,7 +268,7 @@ void MSetPixels(FRAC_INFO *info, unsigned char *pixels, double cx, double cy)
 }
 
 // Calculate greyscale unsigned char RGB pixels
-void calcPixels(const FRAC_INFO *info, WORK_DATA *data)
+void calcPixels(FRAC_INFO *info, WORK_DATA *data)
 {
     int nx = info->num_cols;
     int ny = data->num_rows;
@@ -288,7 +288,7 @@ void calcPixels(const FRAC_INFO *info, WORK_DATA *data)
 }
 
 // calculate greyscale unsigned char RGB pixels
-void calcColorPixels(const FRAC_INFO *info, WORK_DATA *data)
+void calcColorPixels(FRAC_INFO *info, WORK_DATA *data)
 {
     int nx = info->num_cols;
     int ny = data->num_rows;
