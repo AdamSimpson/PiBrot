@@ -308,6 +308,9 @@ void show_both_textures(texture_t *state)
 
 void draw_textures(texture_t *state)
 {
+    // Setup program
+    glUseProgram(state->program);
+
     glClearColor(0.5f, 0.5f, 0.5f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT);
 

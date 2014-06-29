@@ -63,12 +63,14 @@ int main(int argc, char *argv[])
         master(&render_state, &frac_left, &frac_right, &texture_state);
 
         // Wait for key press
-	while(!render_state.terminate) {
-            check_user_input(&gl_state);
-        }
+//	while(!render_state.terminate) {
+//            check_user_input(&gl_state);
+//        }
 
         // Clean up and exit
         exit_ogl(&gl_state);
+        exit_exit_menu(&exit_menu_state);
+
         MPI_Finalize();
         return render_state.return_value;
 

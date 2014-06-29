@@ -166,10 +166,6 @@ void master(render_t *render_state, FRAC_INFO *frac_left, FRAC_INFO *frac_right,
 
     while(num_ranks_complete < ntasks-1) {
 
-        // Render exit menu
-        if(render_state->quit_mode)
-            render_exit_menu(render_state->exit_menu_state, 0.0, 0.0);
-
 	// Receive work load and unpack
         master_recv_and_unpack(&work_recv, buffer, full_size);
 
@@ -184,6 +180,10 @@ void master(render_t *render_state, FRAC_INFO *frac_left, FRAC_INFO *frac_right,
 
         // Update texture with recieved buffer
         update_fractal_rows(texture_state, side, work_recv.start_row, work_recv.num_rows, work_recv.pixels);
+
+        // Render exit menu
+        if(render_state->quit_mode)
+            render_exit_menu(render_state->exit_menu_state, 0.0f, 0.0f);
 
         // Get more work
         work_send.rank = work_recv.rank;
