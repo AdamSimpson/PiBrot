@@ -2,19 +2,13 @@
 #include <assert.h>
 
 #include "multi_tex.h"
-#include "egl_utils.h"
-
-#include "GLES2/gl2.h"
-#include "EGL/egl.h"
-#include "EGL/eglext.h"
-
+#include "ogl_utils.h"
+#include "stdlib.h"
 #include "fractal.h"
-
-#include "bcm_host.h"
 
 #define USE_MIPMAP 1
 
-void create_textures(STATE_T *state, FRAC_INFO *frac_left, FRAC_INFO *frac_right)
+void create_textures(texture_t *state, FRAC_INFO *frac_left, FRAC_INFO *frac_right)
 {
     int i,j;
     GLubyte *pixels;
@@ -44,7 +38,11 @@ void create_textures(STATE_T *state, FRAC_INFO *frac_left, FRAC_INFO *frac_right
     glBindTexture(GL_TEXTURE_2D, state->textures[LEFT]);
 
     // Load texture
+    #ifdef GLFW
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, state->tex_width[LEFT], state->tex_height[LEFT], 0, GL_RED, GL_UNSIGNED_BYTE, pixels);
+    #else
     glTexImage2D(GL_TEXTURE_2D, 0, GL_LUMINANCE, state->tex_width[LEFT], state->tex_height[LEFT], 0, GL_LUMINANCE, GL_UNSIGNED_BYTE, pixels);
+    #endif
 
     // Set filtering modes
     #if !(USE_MIPMAP)
@@ -54,7 +52,6 @@ void create_textures(STATE_T *state, FRAC_INFO *frac_left, FRAC_INFO *frac_right
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     #endif
-
 
     free(pixels);
 
@@ -75,7 +72,11 @@ void create_textures(STATE_T *state, FRAC_INFO *frac_left, FRAC_INFO *frac_right
     glBindTexture(GL_TEXTURE_2D, state->textures[1]);
 
     // Load texture
+    #ifdef GLFW
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, state->tex_width[RIGHT], state->tex_height[RIGHT], 0, GL_RED, GL_UNSIGNED_BYTE, pixels);
+    #else
     glTexImage2D(GL_TEXTURE_2D, 0, GL_LUMINANCE, state->tex_width[RIGHT], state->tex_height[RIGHT], 0, GL_LUMINANCE, GL_UNSIGNED_BYTE, pixels);
+    #endif
 
     #if USE_MIPMAP
     // Generate mipmap
@@ -96,24 +97,30 @@ void create_textures(STATE_T *state, FRAC_INFO *frac_left, FRAC_INFO *frac_right
 
 }
 
-void update_texture_rows(STATE_T *state, int fractal, GLsizei start_row, GLuint num_rows, GLubyte *row_pixels)
+void update_texture_rows(texture_t *state, int fractal, GLsizei start_row, GLuint num_rows, GLubyte *row_pixels)
 {
     glBindTexture(GL_TEXTURE_2D, state->textures[fractal]);
+
+    #ifdef GLFW
+    glTexSubImage2D(GL_TEXTURE_2D, 0, 0, start_row, state->tex_width[fractal], num_rows, GL_RED, GL_UNSIGNED_BYTE, row_pixels);
+    #else
     glTexSubImage2D(GL_TEXTURE_2D, 0, 0, start_row, state->tex_width[fractal], num_rows, GL_LUMINANCE, GL_UNSIGNED_BYTE, row_pixels);
+    #endif
+
     #if USE_MIPMAP
     glGenerateMipmap(GL_TEXTURE_2D);
     #endif
 }
 
 // GLUE between outside world and textures - still requires state which I don't like
-void update_fractal_rows(STATE_T *state, int fractal, unsigned int start_row, unsigned int num_rows, unsigned char *row_pixels)
+void update_fractal_rows(texture_t *state, int fractal, unsigned int start_row, unsigned int num_rows, unsigned char *row_pixels)
 {
    update_texture_rows(state, fractal, (GLsizei)start_row, (GLsizei)num_rows, (GLubyte*)row_pixels);
    // Draw textures
    draw_textures(state);
-   // Swap buffers
-   egl_swap(&state->egl_state);
 
+   // Swap buffers
+   swap_ogl(state->gl_state);
 }
 
 void create_vertices()
@@ -138,6 +145,13 @@ void create_vertices()
 	-1.0f, -1.0f, 0.0f, 1.0f  // Bottom left
     };
 
+    // VAO is required for OpenGL 3+ when using VBO I believe
+    #ifndef RASPI
+    GLuint vao;
+    glGenVertexArrays(1, &vao);
+    glBindVertexArray(vao);
+    #endif
+
     // Generate vertex buffer
     GLuint vbo;
     glGenBuffers(1, &vbo);
@@ -160,8 +174,28 @@ void create_vertices()
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, 2*3*sizeof(GLubyte), elements, GL_STATIC_DRAW);
 }
 
-void create_shaders(STATE_T *state)
+void create_shaders(texture_t *state)
 {
+    #ifdef GLFW
+    // Shader source
+    const GLchar* vertexSource =
+        "#version 150 core\n"
+        "in vec2 position;"
+        "in vec2 tex_coord;"
+        "out vec2 frag_tex_coord;"
+        "void main() {"
+        "   gl_Position = vec4(position, 0.0, 1.0);"
+        "   frag_tex_coord = tex_coord;"
+        "}";
+    const GLchar* fragmentSource =
+        "#version 150 core\n"
+        "in vec2 frag_tex_coord;"
+        "uniform sampler2D tex;"
+        "out vec4 OutColor;"
+        "void main() {"
+        "   OutColor = texture(tex, frag_tex_coord);"
+        "}";
+    #else
     // Shader source
     const GLchar* vertexSource =
         "attribute vec2 position;"
@@ -178,6 +212,7 @@ void create_shaders(STATE_T *state)
         "void main() {"
         "   gl_FragColor = texture2D(tex, frag_tex_coord);"
         "}";
+    #endif
 
     // Compile vertex shader
     GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER);
@@ -197,12 +232,12 @@ void create_shaders(STATE_T *state)
     state->program = glCreateProgram();
     glAttachShader(state->program, vertexShader);
     glAttachShader(state->program, fragmentShader);
-   
+
     // Link and use program
     glLinkProgram(state->program);
     glUseProgram(state->program);
     check();
-
+   
     // Get position location
     state->position_location = glGetAttribLocation(state->program, "position");
     // Get tex_coord location
@@ -211,7 +246,7 @@ void create_shaders(STATE_T *state)
     state->tex_location = glGetUniformLocation(state->program, "tex");
 }
 
-void show_left_tex_fullscreen(STATE_T *state)
+void show_left_tex_fullscreen(texture_t *state)
 {
     // Size of each vertex in bytes
     size_t vert_size = 4*sizeof(GL_FLOAT);
@@ -228,11 +263,11 @@ void show_left_tex_fullscreen(STATE_T *state)
     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_BYTE, 0);
 
    // Swap buffers
-   egl_swap(&state->egl_state);
+   swap_ogl(state->gl_state);
 
 }
 
-void show_right_tex_fullscreen(STATE_T *state)
+void show_right_tex_fullscreen(texture_t *state)
 {
     // Size of each vertex in bytes
     size_t vert_size = 4*sizeof(GL_FLOAT);
@@ -249,17 +284,17 @@ void show_right_tex_fullscreen(STATE_T *state)
     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_BYTE, 0);
 
     // Swap buffers
-    egl_swap(&state->egl_state);
+    swap_ogl(state->gl_state);
 
 }
 
-void show_both_textures(STATE_T *state)
+void show_both_textures(texture_t *state)
 {
     draw_textures(state);
-    egl_swap(&state->egl_state);
+    swap_ogl(state->gl_state);
 }
 
-void draw_textures(STATE_T *state)
+void draw_textures(texture_t *state)
 {
     glClearColor(0.5f, 0.5f, 0.5f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT);

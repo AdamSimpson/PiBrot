@@ -101,7 +101,7 @@ int slave_recv_and_unpack(WORK_DATA *work, char *pack_buffer, int buffer_size)
     return tag;
 }
 
-void master(FRAC_INFO *frac_left, FRAC_INFO *frac_right, STATE_T *ogl_state)
+void master(FRAC_INFO *frac_left, FRAC_INFO *frac_right, texture_t *texture_state)
 {
     int ntasks, dest, side;
     WORK_DATA work_send;
@@ -178,7 +178,7 @@ void master(FRAC_INFO *frac_left, FRAC_INFO *frac_right, STATE_T *ogl_state)
 	}
 
         // Update texture with recieved buffer
-        update_fractal_rows(ogl_state, side, work_recv.start_row, work_recv.num_rows, work_recv.pixels);
+        update_fractal_rows(texture_state, side, work_recv.start_row, work_recv.num_rows, work_recv.pixels);
 
         // Get more work
         work_send.rank = work_recv.rank;
