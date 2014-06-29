@@ -4,6 +4,7 @@
 #include "renderer.h"
 #include "image_gl.h"
 #include "cursor_gl.h"
+#include "stdlib.h"
 
 void init_exit_menu(exit_menu_t *state, gl_t *gl_state)
 {

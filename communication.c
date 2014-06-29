@@ -5,6 +5,7 @@
 #include <mpi.h>
 #include "fractal.h"
 #include "communication.h"
+#include "exit_menu_gl.h"
 
 #define WORKTAG 1
 #define DIETAG 2
@@ -101,7 +102,7 @@ int slave_recv_and_unpack(WORK_DATA *work, char *pack_buffer, int buffer_size)
     return tag;
 }
 
-void master(FRAC_INFO *frac_left, FRAC_INFO *frac_right, texture_t *texture_state)
+void master(render_t *render_state, FRAC_INFO *frac_left, FRAC_INFO *frac_right, texture_t *texture_state)
 {
     int ntasks, dest, side;
     WORK_DATA work_send;
@@ -164,6 +165,10 @@ void master(FRAC_INFO *frac_left, FRAC_INFO *frac_right, texture_t *texture_stat
     int num_ranks_complete = 0;    
 
     while(num_ranks_complete < ntasks-1) {
+
+        // Render exit menu
+        if(render_state->quit_mode)
+            render_exit_menu(render_state->exit_menu_state, 0.0, 0.0);
 
 	// Receive work load and unpack
         master_recv_and_unpack(&work_recv, buffer, full_size);

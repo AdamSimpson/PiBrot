@@ -5,6 +5,7 @@
 #include "stdio.h"
 #include "string.h"
 #include "renderer.h"
+#include "exit_menu_gl.h"
 
 int main(int argc, char *argv[])
 {
@@ -35,6 +36,11 @@ int main(int argc, char *argv[])
         render_state.screen_height = gl_state.screen_height;
         render_state.return_value = 0;
 
+        // Initialize exit menu
+        exit_menu_t exit_menu_state;
+        init_exit_menu(&exit_menu_state, &gl_state);
+        render_state.exit_menu_state = &exit_menu_state;
+
         // Setup texture state
         texture_t texture_state;
         memset(&texture_state, 0, sizeof(texture_t));
@@ -54,7 +60,7 @@ int main(int argc, char *argv[])
         swap_ogl(&gl_state);
 
         // Start master loop
-        master(&frac_left, &frac_right, &texture_state);
+        master(&render_state, &frac_left, &frac_right, &texture_state);
 
         // Wait for key press
 	while(!render_state.terminate) {
