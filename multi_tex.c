@@ -10,7 +10,7 @@
 
 void create_textures(texture_t *state, FRAC_INFO *frac_left, FRAC_INFO *frac_right)
 {
-    int i,j;
+    int i,j,k;
     GLubyte *pixels;
 
     state->tex_width[LEFT] = frac_left->num_cols;
@@ -19,22 +19,30 @@ void create_textures(texture_t *state, FRAC_INFO *frac_left, FRAC_INFO *frac_rig
     state->tex_width[RIGHT] = frac_right->num_cols;
     state->tex_height[RIGHT] = frac_right->num_rows;
 
+    size_t pixel_bytes;
+    pixel_bytes = state->tex_width[LEFT]*state->tex_height[LEFT]*sizeof(GLubyte)*frac_left->channels;
+ 
     // Left fractal
-    pixels = malloc(state->tex_width[LEFT]*state->tex_height[LEFT]*sizeof(GLubyte));
-    for(i=0; i<state->tex_height[LEFT]; i++) {
-        for(j=0; j<state->tex_width[LEFT]; j++) {
-            pixels[i*state->tex_width[LEFT] + j] = 0;
-        }
-    }
-      
-    // Pixel packing
-    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+    pixels = malloc(pixel_bytes);
 
+     // Pixel packing
+    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
     // Generate texture
     glGenTextures(NUM_TEXTURES, state->textures);
-
-    // Set texture unit 0 and bind texture
+    // Set sampler
     glActiveTexture(GL_TEXTURE0);
+ 
+   
+    // Initialize left texture to black
+    for(i=0; i<state->tex_height[LEFT]; i++) {
+        for(j=0; j<state->tex_width[LEFT]; j++) {
+            for(k=0; k<frac_left->channels; k++) {
+                pixels[(i*state->tex_width[LEFT] + j)*frac_left->channels + k] = 255;
+            }
+        }
+    }
+ 
+    // Bind texture
     glBindTexture(GL_TEXTURE_2D, state->textures[LEFT]);
 
     // Load texture
@@ -60,11 +68,18 @@ void create_textures(texture_t *state, FRAC_INFO *frac_left, FRAC_INFO *frac_rig
     glGenerateMipmap(GL_TEXTURE_2D);
     #endif
 
-    // Right image
-    pixels = malloc(state->tex_width[RIGHT]*state->tex_height[RIGHT]*sizeof(GLubyte));
+    free(pixels);
+
+    // Right fractal
+    pixel_bytes = state->tex_width[RIGHT]*state->tex_height[RIGHT]*sizeof(GLubyte)*frac_right->channels; 
+    pixels = malloc(pixel_bytes);
+
+    // Initialize right texture to white
     for(i=0; i<state->tex_height[RIGHT]; i++) {
         for(j=0; j<state->tex_width[RIGHT]; j++) {
-            pixels[i*state->tex_width[RIGHT] + j] = 255;
+            for(k=0; k<frac_right->channels; k++) {
+                pixels[(i*state->tex_width[RIGHT] + j)*frac_right->channels + k] = 0;
+            }
         }
     }
  
@@ -90,6 +105,15 @@ void create_textures(texture_t *state, FRAC_INFO *frac_left, FRAC_INFO *frac_rig
     #else
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    #endif
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
+
+    #if USE_MIPMAP
+    // Generate mipmap
+    glGenerateMipmap(GL_TEXTURE_2D);
     #endif
 
     // Free pixels
