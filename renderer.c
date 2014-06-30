@@ -31,7 +31,6 @@ int main(int argc, char *argv[])
         // Initialize render parameters
         render_state.pause = false;
         render_state.quit_mode = false;
-        render_state.terminate = false;
         render_state.screen_width = gl_state.screen_width;
         render_state.screen_height = gl_state.screen_height;
         render_state.return_value = 0;
@@ -63,9 +62,19 @@ int main(int argc, char *argv[])
         master(&render_state, &frac_left, &frac_right, &texture_state);
 
         // Wait for key press
-//	while(!render_state.terminate) {
-//            check_user_input(&gl_state);
-//        }
+	while(!window_should_close(&gl_state)) {
+            check_user_input(&gl_state);
+
+            // Draw fractals
+            draw_textures(&texture_state);
+
+            // Render exit menu
+            if(render_state.quit_mode)
+                render_exit_menu(&exit_menu_state, 0.0f, 0.0f);
+
+            // Swap buffers
+            swap_ogl(&gl_state);
+        }
 
         // Clean up and exit
         exit_ogl(&gl_state);

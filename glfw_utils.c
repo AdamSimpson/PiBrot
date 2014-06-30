@@ -170,8 +170,6 @@ void init_ogl(gl_t *state, render_t *render_state)
 void swap_ogl(gl_t *state)
 {
     glfwSwapBuffers(state->window);
-
-    glfwPollEvents();
 }
 
 void exit_ogl(gl_t *state)
