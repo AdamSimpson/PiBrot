@@ -185,6 +185,9 @@ void master(render_t *render_state, FRAC_INFO *frac_left, FRAC_INFO *frac_right,
         if(render_state->quit_mode)
             render_exit_menu(render_state->exit_menu_state, 0.0f, 0.0f);
 
+        // Swap buffers
+        swap_ogl(texture_state->gl_state);
+
         // Get more work
         work_send.rank = work_recv.rank;
         get_work(frac, &work_send);

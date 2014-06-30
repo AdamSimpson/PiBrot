@@ -112,7 +112,7 @@ void render_exit_menu(exit_menu_t *state, float cursor_x, float cursor_y)
     draw_image(state->sph_state);
 
     // Draw cursor
-//    draw_cursor(state->cursor_state);
+    draw_cursor(state->cursor_state);
 }
 
 void update_cursor(exit_menu_t *state, float x, float y)

@@ -49,7 +49,7 @@ int main(int argc, char *argv[])
         // Create and set textures
         create_textures(&texture_state, &frac_left, &frac_right);
         // Create and set vertices
-        create_vertices();
+        create_vertices(&texture_state);
         // Create and set shaders
         create_shaders(&texture_state);
 

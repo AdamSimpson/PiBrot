@@ -1,8 +1,6 @@
 #ifndef MULTI_TEX_H
 #define MULTI_TEX_H
 
-//#include "GLES2/gl2.h"
-//#include "egl_utils.h"
 #include "ogl_utils.h"
 #include "fractal.h"
 
@@ -30,17 +28,20 @@ typedef struct texture_t
     GLsizei tex_width[NUM_TEXTURES];
     GLsizei tex_height[NUM_TEXTURES];
 
+    GLuint vbo;
+    GLuint ebo;
+
     int terminate;
 } texture_t;
 
 void update_texture_rows(texture_t *state, int fractal, GLsizei start_row, GLuint num_rows, GLubyte *row_pixels);
 void update_fractal_rows(texture_t *state, int fractal, unsigned int start_row, unsigned int num_rows, unsigned char *row_pixels);
 void create_textures(texture_t *state, FRAC_INFO *frac_left, FRAC_INFO *frac_right);
-void create_vertices();
+void create_vertices(texture_t *state);
 void create_shaders(texture_t *state);
 void draw_textures(texture_t *state);
-void show_left_tex_fullscreen(texture_t *state);
-void show_right_tex_fullscreen(texture_t *state);
-void show_both_textures(texture_t *state);
+//void show_left_tex_fullscreen(texture_t *state);
+//void show_right_tex_fullscreen(texture_t *state);
+//void show_both_textures(texture_t *state);
 
 #endif

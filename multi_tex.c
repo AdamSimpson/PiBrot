@@ -130,12 +130,9 @@ void update_fractal_rows(texture_t *state, int fractal, unsigned int start_row, 
    update_texture_rows(state, fractal, (GLsizei)start_row, (GLsizei)num_rows, (GLubyte*)row_pixels);
    // Draw textures
    draw_textures(state);
-
-   // Swap buffers
-   swap_ogl(state->gl_state);
 }
 
-void create_vertices()
+void create_vertices(texture_t *state)
 {
     // Vertices: Pos(x,y) Tex(x,y)
     // For simplicity only single vbo is generated and offset used as needed
@@ -165,10 +162,9 @@ void create_vertices()
     #endif
 
     // Generate vertex buffer
-    GLuint vbo;
-    glGenBuffers(1, &vbo);
+    glGenBuffers(1, &state->vbo);
     // Set buffer
-    glBindBuffer(GL_ARRAY_BUFFER, vbo);
+    glBindBuffer(GL_ARRAY_BUFFER, state->vbo);
     // Fill buffer
     glBufferData(GL_ARRAY_BUFFER, 3*4*4*sizeof(GLfloat), vertices, GL_STATIC_DRAW);
 
@@ -178,10 +174,9 @@ void create_vertices()
         0, 1, 2
     };
     // Generate element buffer
-    GLuint ebo;
-    glGenBuffers(1, &ebo);
+    glGenBuffers(1, &state->ebo);
     // Set buffer
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, state->ebo);
     // Fill buffer
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, 2*3*sizeof(GLubyte), elements, GL_STATIC_DRAW);
 }
@@ -257,7 +252,7 @@ void create_shaders(texture_t *state)
     // Get tex uniform location
     state->tex_location = glGetUniformLocation(state->program, "tex");
 }
-
+/*
 void show_left_tex_fullscreen(texture_t *state)
 {
     // Size of each vertex in bytes
@@ -297,7 +292,6 @@ void show_right_tex_fullscreen(texture_t *state)
 
     // Swap buffers
     swap_ogl(state->gl_state);
-
 }
 
 void show_both_textures(texture_t *state)
@@ -305,6 +299,7 @@ void show_both_textures(texture_t *state)
     draw_textures(state);
     swap_ogl(state->gl_state);
 }
+*/
 
 void draw_textures(texture_t *state)
 {
@@ -316,6 +311,9 @@ void draw_textures(texture_t *state)
 
     // Size of each vertex in bytes
     size_t vert_size = 4*sizeof(GL_FLOAT);
+
+    glBindBuffer(GL_ARRAY_BUFFER, state->vbo);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, state->ebo);
 
     // Draw left fractal
     glVertexAttribPointer(state->position_location, 2, GL_FLOAT, GL_FALSE, vert_size, 0);
