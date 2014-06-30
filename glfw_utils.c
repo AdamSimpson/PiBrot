@@ -61,8 +61,6 @@ static void key_callback(GLFWwindow* window, int key, int scancode, int action, 
         switch(key)
         { 
             case GLFW_KEY_ESCAPE:
-                if(render_state->quit_mode)
-                    glfwSetWindowShouldClose(window, GL_TRUE);
                 toggle_quit_mode(render_state);              
 	        break;
             case GLFW_KEY_A:
@@ -86,6 +84,8 @@ static void mouse_callback(GLFWwindow* window, double xpos, double ypos)
     new_y = new_y/(0.5*render_state->screen_height) - 1.0;
     new_x = xpos/(0.5*render_state->screen_width) - 1.0;
 
+    render_state->mouse_x = new_x;
+    render_state->mouse_y = new_y;
 //    set_mover_gl_center(render_state, new_x, new_y);
 }
 

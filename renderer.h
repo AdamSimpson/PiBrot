@@ -3,7 +3,7 @@
 
 #include "stdbool.h"
 
-struct exit_menu_t; //blarg...
+struct exit_menu_t;
 
 // enum of displayed parameter values
 typedef enum {
@@ -23,7 +23,9 @@ typedef struct render_t {
     bool quit_mode;
     struct exit_menu_t *exit_menu_state;
     int return_value;
-    bool terminate;
+    bool start;
+    float mouse_x;
+    float mouse_y;
 } render_t;
 
 #endif

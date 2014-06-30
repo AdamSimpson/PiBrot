@@ -29,7 +29,7 @@ int main(int argc, char *argv[])
         init_ogl(&gl_state, &render_state);
 
         // Initialize render parameters
-        render_state.pause = false;
+        render_state.pause = true;
         render_state.quit_mode = false;
         render_state.screen_width = gl_state.screen_width;
         render_state.screen_height = gl_state.screen_height;
@@ -58,6 +58,12 @@ int main(int argc, char *argv[])
         // Swap front/back buffers
         swap_ogl(&gl_state);
 
+        // Wait for user to unpause(start) simulation
+        while(render_state.pause)
+        {
+            check_user_input(&gl_state);
+        }
+
         // Start master loop
         master(&render_state, &frac_left, &frac_right, &texture_state);
 
@@ -70,7 +76,7 @@ int main(int argc, char *argv[])
 
             // Render exit menu
             if(render_state.quit_mode)
-                render_exit_menu(&exit_menu_state, 0.0f, 0.0f);
+                render_exit_menu(&exit_menu_state, render_state.mouse_x, render_state.mouse_y);
 
             // Swap buffers
             swap_ogl(&gl_state);
