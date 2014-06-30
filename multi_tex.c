@@ -183,62 +183,26 @@ void create_vertices(texture_t *state)
 
 void create_shaders(texture_t *state)
 {
-    #ifdef GLFW
-    // Shader source
-    const GLchar* vertexSource =
-        "#version 150 core\n"
-        "in vec2 position;"
-        "in vec2 tex_coord;"
-        "out vec2 frag_tex_coord;"
-        "void main() {"
-        "   gl_Position = vec4(position, 0.0, 1.0);"
-        "   frag_tex_coord = tex_coord;"
-        "}";
-    const GLchar* fragmentSource =
-        "#version 150 core\n"
-        "in vec2 frag_tex_coord;"
-        "uniform sampler2D tex;"
-        "out vec4 OutColor;"
-        "void main() {"
-        "   OutColor = texture(tex, frag_tex_coord);"
-        "}";
+    // Compile vertex shader
+    GLuint vertex_shader = glCreateShader(GL_VERTEX_SHADER);
+    #ifdef RASPI
+        compile_shader(vertex_shader, "PiBrot/shaders/texture_es.vert");
     #else
-    // Shader source
-    const GLchar* vertexSource =
-        "attribute vec2 position;"
-        "attribute vec2 tex_coord;"
-        "varying vec2 frag_tex_coord;"
-        "void main() {"
-        "   gl_Position = vec4(position, 0.0, 1.0);"
-        "   frag_tex_coord = tex_coord;"
-        "}";
-    const GLchar* fragmentSource =
-        "precision mediump float;"
-        "varying vec2 frag_tex_coord;"
-        "uniform sampler2D tex;"
-        "void main() {"
-        "   gl_FragColor = texture2D(tex, frag_tex_coord);"
-        "}";
+        compile_shader(vertex_shader, "shaders/texture.vert");
     #endif
 
-    // Compile vertex shader
-    GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER);
-    glShaderSource(vertexShader, 1, &vertexSource, NULL);
-    glCompileShader(vertexShader);
-
-    showlog(vertexShader);   
-
-    // Compile frag shader
-    GLuint fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-    glShaderSource(fragmentShader, 1, &fragmentSource, NULL);
-    glCompileShader(fragmentShader);
-
-    showlog(fragmentShader);
+    // Compile fragment shader
+    GLuint frag_shader = glCreateShader(GL_FRAGMENT_SHADER);
+    #ifdef RASPI
+        compile_shader(frag_shader, "PiBrot/shaders/texture_es.frag");
+    #else
+        compile_shader(frag_shader, "shaders/texture.frag");
+    #endif
 
     // Create shader program
     state->program = glCreateProgram();
-    glAttachShader(state->program, vertexShader);
-    glAttachShader(state->program, fragmentShader);
+    glAttachShader(state->program, vertex_shader);
+    glAttachShader(state->program, frag_shader);
 
     // Link and use program
     glLinkProgram(state->program);
