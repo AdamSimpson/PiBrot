@@ -6,6 +6,7 @@
 #include "string.h"
 #include "renderer.h"
 #include "exit_menu_gl.h"
+#include "start_menu_gl.h"
 
 int main(int argc, char *argv[])
 {
@@ -29,7 +30,7 @@ int main(int argc, char *argv[])
         init_ogl(&gl_state, &render_state);
 
         // Initialize render parameters
-        render_state.pause = true;
+        render_state.started = false;
         render_state.quit_mode = false;
         render_state.screen_width = gl_state.screen_width;
         render_state.screen_height = gl_state.screen_height;
@@ -39,6 +40,11 @@ int main(int argc, char *argv[])
         exit_menu_t exit_menu_state;
         init_exit_menu(&exit_menu_state, &gl_state);
         render_state.exit_menu_state = &exit_menu_state;
+
+        // Initialize start menu
+        start_menu_t start_menu_state;
+        init_start_menu(&start_menu_state, &gl_state);
+        render_state.start_menu_state = &start_menu_state;
 
         // Setup texture state
         texture_t texture_state;
@@ -59,9 +65,12 @@ int main(int argc, char *argv[])
         swap_ogl(&gl_state);
 
         // Wait for user to unpause(start) simulation
-        while(render_state.pause)
+        while(!render_state.started)
         {
             check_user_input(&gl_state);
+            draw_textures(&texture_state);
+            render_start_menu(&start_menu_state, render_state.mouse_x, render_state.mouse_y);
+            swap_ogl(&gl_state);
         }
 
         // Start master loop

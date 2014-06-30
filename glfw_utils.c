@@ -29,6 +29,7 @@ THE SOFTWARE.
 #include "glfw_utils.h"
 #include "renderer.h"
 #include "exit_menu_gl.h"
+#include "start_menu_gl.h"
 
 void check_user_input(gl_t *state)
 {
@@ -64,11 +65,10 @@ static void key_callback(GLFWwindow* window, int key, int scancode, int action, 
                 toggle_quit_mode(render_state);              
 	        break;
             case GLFW_KEY_A:
+                if(!render_state->started)
+                    check_start_race(render_state);
                 if(render_state->quit_mode)
-                    exit_with_selected_program(render_state, window);
-                break;
-            case GLFW_KEY_P:
-                toggle_pause(render_state);
+                    check_exit_with_selected_program(render_state, window);
                 break;
         }
     }
@@ -197,7 +197,7 @@ void pixel_to_gl(gl_t *state, int pixel_x, int pixel_y, float *gl_x, float *gl_y
 }
 
 // Exit and set return value for specific program if one selected
-void exit_with_selected_program(render_t *render_state, GLFWwindow* window)
+void check_exit_with_selected_program(render_t *render_state, GLFWwindow* window)
 {
     if(render_state->exit_menu_state->mandelbrot_state->selected) {
         glfwSetWindowShouldClose(window, GL_TRUE);
@@ -213,9 +213,10 @@ void exit_with_selected_program(render_t *render_state, GLFWwindow* window)
     }
 }
 
-void toggle_pause(render_t *state)
+void check_start_race(render_t *render_state)
 {
-    state->pause = !state->pause;
+    if(render_state->start_menu_state->start_state->selected && render_state->started == false)
+        render_state->started = true;
 }
 
 void toggle_quit_mode(render_t *state)

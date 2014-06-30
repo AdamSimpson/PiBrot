@@ -8,7 +8,7 @@ CCFLAGS+= -mfloat-abi=hard -mfpu=vfp -ffast-math -O3
 
 pibrot:	pibrot.c communication.c egl_utils.c fractal.c multi_tex.c
 	mkdir -p bin
-	mpicc -O3 $(CCFLAGS) $(INCLUDES) $(LDFLAGS) ogl_utils.c renderer.c communication.c egl_utils.c image_gl.c lodepng.c cursor_gl.c exit_menu_gl.c fractal.c multi_tex.c -o bin/pibrot
+	mpicc -O3 $(CCFLAGS) $(INCLUDES) $(LDFLAGS) ogl_utils.c renderer.c communication.c egl_utils.c image_gl.c lodepng.c cursor_gl.c start_menu_gl.c exit_menu_gl.c fractal.c multi_tex.c -o bin/pibrot
 
 run: copy
 	cd $(HOME) && mpirun --host 192.168.3.100,192.168.3.101,192.168.3.102,192.168.3.103 -n 4 ./pibrot && cd PiBrot 

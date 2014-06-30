@@ -4,6 +4,7 @@
 #include "stdbool.h"
 
 struct exit_menu_t;
+struct start_menu_t;
 
 // enum of displayed parameter values
 typedef enum {
@@ -19,9 +20,10 @@ typedef enum {
 typedef struct render_t {
     float screen_width;
     float screen_height;
-    bool pause;
+    bool started;
     bool quit_mode;
     struct exit_menu_t *exit_menu_state;
+    struct start_menu_t *start_menu_state;
     int return_value;
     bool start;
     float mouse_x;

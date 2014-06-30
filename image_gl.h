@@ -71,5 +71,6 @@ void create_image_vertices(image_t *state);
 void create_image_texture(image_t *state);
 void draw_image(image_t *state);
 bool inside_image(image_t *state, float gl_x, float gl_y);
+void check_cursor_in_image(cursor_t *cursor_state, image_t *image_state);
 
 #endif

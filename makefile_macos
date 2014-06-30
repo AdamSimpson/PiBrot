@@ -5,7 +5,7 @@ CFLAGS= -DGLFW -O3 -ffast-math -lm
 
 all:
 	mkdir -p bin
-	$(CC) $(CINCLUDES) $(CFLAGS) $(CLIBS) ogl_utils.c renderer.c communication.c glfw_utils.c image_gl.c lodepng.c cursor_gl.c exit_menu_gl.c fractal.c multi_tex.c -o bin/pibrot
+	$(CC) $(CINCLUDES) $(CFLAGS) $(CLIBS) ogl_utils.c renderer.c communication.c glfw_utils.c image_gl.c lodepng.c cursor_gl.c exit_menu_gl.c start_menu_gl.c fractal.c multi_tex.c -o bin/pibrot
 
 
 clean:

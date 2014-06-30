@@ -28,6 +28,7 @@ THE SOFTWARE.
 #include "image_gl.h"
 
 #include "ogl_utils.h"
+#include "cursor_gl.h"
 
 void create_image_program(image_t *state)
 {
@@ -299,3 +300,45 @@ bool inside_image(image_t *state, float gl_x, float gl_y)
 
     return false;
 }
+
+// Check if cursor is inside of image, if so set selected attribute
+void check_cursor_in_image(cursor_t *cursor_state, image_t *image_state)
+{
+    float x, y;
+
+    // image dimensions in gl screen coordinates
+    float half_width = (cursor_state->cursor_width/(float)cursor_state->gl_state->screen_width);
+    float half_height = (cursor_state->cursor_height/(float)cursor_state->gl_state->screen_height);
+
+    // Upper left corner
+    x = cursor_state->center_x - half_width;
+    y = cursor_state->center_y + half_height;
+    if( inside_image(image_state, x, y) ){
+        image_state->selected = true;
+        return;
+    }
+    // Lower left corner
+    x = cursor_state->center_x - half_width;
+    y = cursor_state->center_y - half_height;
+    if( inside_image(image_state, x, y) ){
+        image_state->selected = true;
+        return;
+    }
+    // Upper right corner
+    x = cursor_state->center_x + half_width;
+    y = cursor_state->center_y + half_height;
+    if( inside_image(image_state, x, y) ){
+        image_state->selected = true;
+        return;
+    }
+    // Lower right corner
+    x = cursor_state->center_x + half_width;
+    y = cursor_state->center_y - half_height;
+    if( inside_image(image_state, x, y) ){
+        image_state->selected = true;
+        return;
+    }
+
+    image_state->selected = false;
+}
+
