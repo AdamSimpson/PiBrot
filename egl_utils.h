@@ -34,7 +34,6 @@ THE SOFTWARE.
 
 #include "bcm_host.h"
 #include "renderer.h"
-#include "controls.h"
 
 typedef struct gl_t {
     uint32_t screen_width;
@@ -68,7 +67,7 @@ void handle_mouse(gl_t *state, struct input_event *event);
 void handle_joystick(gl_t *state, struct input_event *event);
 bool window_should_close(gl_t *state);
 void pixel_to_gl(gl_t *state, int pixel_x, int pixel_y, float *gl_x, float *gl_y);
-void check_exit_with_selected_program(render_t *render_state, GLFWwindow* window);
+void check_exit_with_selected_program(render_t *render_state, gl_t *gl_state);
 void toggle_quit_mode(render_t *state);
 void check_start_race(render_t *render_state);
 
